@@ -1,0 +1,34 @@
+@font-face {
+    src: url("/fonts/LinLibertine_R.ttf");
+}
+
+#introDescription {
+    -fx-font-family: "Linux Libertine", regular;
+    -fx-font-size: 48px;
+    -fx-text-fill: white;
+}
+
+#introTitle {
+    -fx-font-family: "Linux Libertine", regular;
+    -fx-font-size: 120px;
+    -fx-text-fill: white;
+}
+
+#introBg {
+    -fx-background-color: #393a3b;
+}
+
+#introBtn {
+    -fx-font-family: "Linux Libertine", bold;
+    -fx-background-color: #2971d6;
+    -fx-background-radius: none;
+    -fx-text-fill: white;
+    -fx-font-size: 32px;
+}
+
+#introBtn:pressed {
+}
+
+#introBtn:hover {
+    -fx-background-color: #125ec9;
+}

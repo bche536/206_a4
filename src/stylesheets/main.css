@@ -1,0 +1,250 @@
+/*  @font-face {
+    src: url("/fonts/Raleway-SemiBold.ttf");
+}
+
+* {
+    -fx-font-family: "Raleway", sans-serif;
+}
+
+*/
+
+
+
+.defaultBtn {
+    -fx-background-color: #2971d6;
+    -fx-background-radius: none;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+}
+
+.defaultBtn:disabled {
+    -fx-background-color: grey;
+}
+
+.defaultBtn:hover {
+    -fx-background-color: #125ec9;
+}
+
+
+.tabBg {
+    -fx-background-color: #393a3b;
+}
+
+.anchorBg {
+
+    -fx-background-color: #393a3b;
+}
+
+.myTab {
+-fx-tab-min-width: 175px;
+-fx-tab-max-width: 175px;
+/*    -fx-tab-min-height: 1.75em; /* 21 */
+/*    -fx-tab-max-height: 1.75em; /* 21 */
+    -fx-tab-min-height:  35px;
+    -fx-tab-max-height: 35px;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.myTab:hover {
+    -fx-background-color: #303bff;
+}
+
+.tab-pane:top > .tab-header-area {
+    -fx-background-insets: 0, 0 0 0 0;
+    -fx-padding: 0.0em 0.0em 0.0em 0.0em; /* 5 2 0 10 */
+/*        -fx-box-border: none;
+        -fx-border: none;
+        -fx-border-style: none;
+        -fx-border-insets: 0; */
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    /* This is how it is done in Button, but the -1 inset caused a white line  */
+    /* to appear beneath the tab, which looks bad, so it's taken out below.    */
+/*    -fx-background-color: -fx-shadow-highlight-color, -fx-tab-border-color, -fx-inner-border, -fx-body-color;
+    -fx-background-insets: 0 0 -1 0, 0, 1, 2;*/
+    /*-fx-background-insets: 0, 1, 2;*/
+    -fx-background-insets: 0 1 1 0, 1 2 1 1, 2 3 1 2;
+/*    -fx-background-radius: 20 20 0 0, 4 4 0 0, 3 3 0 0; */
+    -fx-padding: 0.25em 0.0em 0.25em 0.0em; /* 1 6 1 6 */
+        -fx-background-radius: none;
+/*    -fx-text-fill: -fx-text-base-color;*/
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+/*    -fx-background-color: white;*/
+
+/*    -fx-background-color: -fx-tab-border-color, -fx-inner-border, -fx-body-color;
+    -fx-background-radius: 5 5 0 0, 4 4 0 0, 3 3 0 0;
+    -fx-background-insets: 0, 1 1 0 1, 2 2 0 2;*/
+    -fx-background-color: #2971d6;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:hover {
+/*    -fx-background-color: white;*/
+
+/*    -fx-background-color: -fx-tab-border-color, -fx-inner-border, -fx-body-color;
+    -fx-background-radius: 5 5 0 0, 4 4 0 0, 3 3 0 0;
+    -fx-background-insets: 0, 1 1 0 1, 2 2 0 2;*/
+    -fx-background-color: #2971d6;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
+    -fx-background-color: transparent;
+    -fx-alignment: CENTER;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: #393a3b;
+    -fx-background-insets: 0 0 0 0;
+        -fx-border: none;
+
+}
+
+.tab-pane > .tab-content-area {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-padding: 0.0em; /* 0 */
+    /* -fx-opacity: -fx-disabled-opacity;*/
+
+}
+
+/*Table view css*/
+
+.table-view {
+    -fx-background-color: lightgrey;
+    -fx-background-insets: 0,1;
+
+    /* There is some oddness if padding is in em values rather than pixels,
+       in particular, the left border of the control doesn't show. */
+    -fx-padding: 1; /* 0.083333em; */
+
+    /* Constants used throughout the tableview.
+     * TODO: Should these be derived from the palette in .scene?
+     */
+    -fx-table-header-border-color: #959595;
+/*    -fx-table-header-background-color: linear (0%,0%) to (0%,100%) stops (80%, #bbbbbb) (10%, #f6f6f6);*/
+    -fx-table-cell-border-color: #bbbbbb;
+}
+
+table-view .column-header-background,
+.tree-table-view .column-header-background {
+    -fx-background-color: white;
+    -fx-padding: 0;
+}
+
+/* -----------------------------------Search CSS ------------------------------------------------------------------ */
+
+
+/* -------------------------- General Styles -----------------*/
+
+
+.defaultText {
+    -fx-font-size: 16px;
+    -fx-text-fill: white;
+}
+
+.textAreas {
+    -fx-background-radius: none;
+    -fx-background-color: white;
+
+}
+
+.currentSearchTermLabel {
+    -fx-font-size: 16px;
+    -fx-text-fill: white;
+    -fx-background-color: none;
+    -fx-border-color: #2971d6;
+    -fx-border-width: 5px;
+}
+
+.currentSearchTerm {
+    -fx-font-size: 16px;
+    -fx-text-fill: white;
+}
+
+/* --------------------------Searching Styles */
+
+.progress-bar {
+    -fx-background-radius: 0, 0, 0 ,0;
+}
+
+.progress-bar > .track {
+    -fx-background-color: rgba(75, 75, 75, 0.9);
+    -fx-background-insets:  0, 1;
+    -fx-background-radius: 0, 0, 0 ,0;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: #2971d6;
+    -fx-background-radius: none;
+}
+
+
+.searchField {
+    -fx-background-radius: none;
+    -fx-background-color: white;
+    -fx-font-size: 24px;
+}
+
+
+
+/* --------------------------------- Create Audio CSS ---------------------------------------------------------------- */
+
+.audioChoiceBox {
+    -fx-background-radius: none;
+    -fx-background-color: white;
+}
+
+/* --------------- Gridpane for holding images */
+.imageView {
+
+}
+
+.imageHolder {
+    -fx-border-color: white;
+    -fx-background-color: none;
+}
+
+.imageHolder:selected {
+    -fx-border-color: #2971d6;
+    -fx-border-width: 5px;
+    -fx-background-color: none;
+}
+
+.txtLabels {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-padding: 10px;
+    -fx-background-color: rgba(75, 75, 75, 0.9);
+    -fx-line-spacing: 5px;
+}
+
+
+/* ------------------------------------ Review Tab --------------------------------------------------------------------*/
+
+.reviewTable {
+}
+
+.table-view {
+    -fx-background-color: white;
+    -fx-background-insets: 0,1;
+
+    /* There is some oddness if padding is in em values rather than pixels,
+       in particular, the left border of the control doesn't show. */
+    -fx-padding: 1; /* 0.083333em; */
+
+    /* Constants used throughout the tableview.
+     * TODO: Should these be derived from the palette in .scene?
+     */
+    -fx-table-header-border-color: none;
+/*    -fx-table-header-background-color: linear (0%,0%) to (0%,100%) stops (80%, #bbbbbb) (10%, #f6f6f6);*/
+    -fx-table-cell-border-color: #bbbbbb;
+}
+
+
+
+
+
