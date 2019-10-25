@@ -18,6 +18,9 @@ import javafx.scene.media.MediaPlayer;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -460,9 +463,8 @@ public class mainController implements Initializable {
                         } else {
 
                             // show confirmation
-                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
-                                    "The audio file " + audioName + " has been made", ButtonType.OK);
-                            alert.showAndWait();
+                            _alert = _alertGenerator.newAlert("Audio completed", "Audio file generated", "The audio file " + audioName + " has been made", "information");
+                            _alert.showAndWait();
                         }
 
                     } catch (Exception e) {
@@ -644,12 +646,18 @@ public class mainController implements Initializable {
             _flickrService.submit(flickrTask);
 
             flickrTask.setOnRunning((whileRunning) ->{
+                for(int i = 0; i < images.length; i++){
+                    images[i].setVisible(false);
+                }
                 flickrSceneLabel.setText("Searching for images, please wait...");
                 flickrProgress.progressProperty().bind(flickrTask.progressProperty());
             });
 
             //When the thread finished its task prompt the user for a name for the file
             flickrTask.setOnSucceeded((succeededEvent) -> {
+                for(int i = 0; i < images.length; i++){
+                    images[i].setVisible(true);
+                }
                 flickrSceneLabel.setText("Please click on the images that you would like in your creation");
                 flickrProgress.progressProperty().unbind();
                 flickrProgress.setVisible(false);
@@ -665,20 +673,54 @@ public class mainController implements Initializable {
 
     /*=========================== END OF AUDIO PANE LOGIC ===============================*/
 
-    /*=========================== START OF IMAGE PANE LOGIC ===============================*/
+    /*=========================== START OF FLICKR PANE LOGIC ===============================*/
 
     //--------------------------------- finishFlickrBtn Logic -----------------------------------------
 
     @FXML void finishFlickrBtnPressed(ActionEvent event) throws Throwable {
         if(creationNameField.getText().isEmpty() || !isAlphanumeric(creationNameField.getText()) || !isAlphanumeric2(creationNameField.getText())){
-            _alert = _alertGenerator.newAlert("Invalid Input", "Empty field", "Please enter a name for this creation", "error");
+            _alert = _alertGenerator.newAlert("Invalid Input", "Invalid characaters", "Please enter a name for this creation that is alphanumeric", "error");
             _alert.showAndWait();
         }
-        List<Integer> indexes = getSelectedImages();
+        else {
+            String cmd = "mkdir " + _path + "/temp/selectedImages";
+            ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+            Process process = pb.start();
+            List<Image> selectedImages = getSelectedImages();
+            Path targetDir = Paths.get(_path + "/temp/selectedImages");
+
+            if(getSelectedImages() == null) {
+                _alert = _alertGenerator.newAlert("No images", "No images selected", "You have not selected any images, do you want to create a blank creation?", "confirmation");
+                _alert.showAndWait();
+                if(_alert.getResult() == ButtonType.YES){
+                    //create video with no images
+                }
+                else{
+                    //do nothing
+                }
+            }
+            else{
+                for(int i  = 0; i < selectedImages.size(); i++) {
+                    Path sourceDir = Paths.get(selectedImages.get(i).impl_getUrl());
+                    Files.copy(sourceDir, targetDir);
+                }
+            }
+        }
 
     }
 
-    /*=========================== END OF IMAGE PANE LOGIC ===============================*/
+    @FXML void flickrBackBtnPressed(ActionEvent event) throws IOException {
+        createAudioPane.toFront();
+        String cmd = "rm -r " + _path + "/temp/";
+        ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+        Process process = pb.start();
+    }
+
+    @FXML void flickrHelpBtnPressed(ActionEvent event) {
+
+    }
+
+    /*=========================== END OF FLICKR PANE LOGIC ===============================*/
 
 
     /**************************** END OF CREATION TAB LOGIC ***********************************/
@@ -906,14 +948,26 @@ public class mainController implements Initializable {
         }
     }
 
-    public List<Integer> getSelectedImages() {
-        List<Integer> indexes = null;
-        for(int i  = 0; i < imageButtons.length; i++) {
+    public List<Image> getSelectedImages() {
+        int count = 0;
+        //Initial check if no images are selected
+        for(int i = 0; i < imageButtons.length; i++) {
             if(imageButtons[i].isSelected()){
-                indexes.add(i);
+                count++;
             }
         }
-        return indexes;
+        if(count == 0){
+            return null;
+        }
+        List<Integer> indexes = null;
+        List<Image> selectedImages = new ArrayList();
+        //There is at least one image selected so run the loop
+        for(int i  = 0; i < imageButtons.length; i++) {
+            if(imageButtons[i].isSelected()){
+                selectedImages.add(images[i].getImage());
+            }
+        }
+        return selectedImages;
     }
 
     public boolean isAlphanumeric2(String str) {
