@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.MediaPlayer;
@@ -26,10 +27,14 @@ public class mainController implements Initializable {
     private AlertGenerator _alertGenerator = new AlertGenerator();
     private Alert _alert;
 
+    private ExecutorService _flickrService;
+
     //---------------------------------- Query fields ----------------------------------------------
     private String _path, _searchTerm, _searchText, _audioFilePath, _audioFileName;
     private TextInputDialog audioFileNamePrompt;
 
+    //---------------------------------- General fields --------------------------------------------
+    private boolean _selectedPressed;
 
 
     @FXML private Tab myCreations;
@@ -92,6 +97,7 @@ public class mainController implements Initializable {
     @FXML private ToggleButton imageBtn4;
     @FXML private ImageView image4;
     @FXML private ToggleButton imageBtn5;
+    @FXML private ImageView image5;
     @FXML private ToggleButton imageBtn6;
     @FXML private ImageView image6;
     @FXML private ToggleButton imageBtn7;
@@ -102,7 +108,11 @@ public class mainController implements Initializable {
     @FXML private ImageView image9;
     @FXML private ToggleButton imageBtn10;
     @FXML private ImageView image10;
+    @FXML private TextField creationNameField;
     @FXML private Button finishFlickrBtn;
+
+    private ImageView[] images;
+    private ToggleButton[] imageButtons;
 
     /* ========================== END OF FLICKR PANE COMPONENTS ============================== */
 
@@ -161,7 +171,29 @@ public class mainController implements Initializable {
 
         //-------------------------- SET UP FLICKR PANE COMPONENTS ------------------------
 
+        images = new ImageView[10];
+        images[0] = image1;
+        images[1] = image2;
+        images[2] = image3;
+        images[3] = image4;
+        images[4] = image5;
+        images[5] = image6;
+        images[6] = image7;
+        images[7] = image8;
+        images[8] = image9;
+        images[9] = image10;
 
+        imageButtons = new ToggleButton[10];
+        imageButtons[0] = imageBtn1;
+        imageButtons[1] = imageBtn2;
+        imageButtons[2] = imageBtn3;
+        imageButtons[3] = imageBtn4;
+        imageButtons[4] = imageBtn5;
+        imageButtons[5] = imageBtn6;
+        imageButtons[6] = imageBtn7;
+        imageButtons[7] = imageBtn8;
+        imageButtons[8] = imageBtn9;
+        imageButtons[9] = imageBtn10;
 
 
         //-------------------------- SET UP REVIEW TAB COMPONENTS -------------------------
@@ -429,7 +461,7 @@ public class mainController implements Initializable {
 
                             // show confirmation
                             Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
-                                    "The audio file" + audioName + " has been made", ButtonType.OK);
+                                    "The audio file " + audioName + " has been made", ButtonType.OK);
                             alert.showAndWait();
                         }
 
@@ -570,9 +602,11 @@ public class mainController implements Initializable {
 
         }
         else {
+            //getSelectedAudioCreationsCOunt() method updates the _audioFileName field which is the location of the audioFile to be used
             String splitName[] = _audioFileName.split("/");
             String displayFileName = splitName[splitName.length - 1];
             selectedAudioLabel.setText("You have selected the audio file: " + displayFileName);
+            _selectedPressed = true;
         }
     }
 
@@ -599,11 +633,34 @@ public class mainController implements Initializable {
 
     //--------------------------------- audioNextBtn Logic -----------------------------------------
 
-    @FXML void audioNextBtnPressed(ActionEvent event) {
-        //Need to set audio file path
-        //_audioFile = "";
-//        _audioFilePath
-        flickrPane.toFront();
+    @FXML void audioNextBtnPressed(ActionEvent event) throws Throwable {
+        if(_selectedPressed) {
+            flickrProgress.setVisible(true);
+            finishFlickrBtn.setDisable(true);
+            flickrPane.toFront();
+            //When input is valid, make a new task and submit to ExecutorServices and wait
+            flickrClass flickrTask = new flickrClass(_searchTerm, _path);
+            _flickrService = Executors.newSingleThreadExecutor();
+            _flickrService.submit(flickrTask);
+
+            flickrTask.setOnRunning((whileRunning) ->{
+                flickrSceneLabel.setText("Searching for images, please wait...");
+                flickrProgress.progressProperty().bind(flickrTask.progressProperty());
+            });
+
+            //When the thread finished its task prompt the user for a name for the file
+            flickrTask.setOnSucceeded((succeededEvent) -> {
+                flickrSceneLabel.setText("Please click on the images that you would like in your creation");
+                flickrProgress.progressProperty().unbind();
+                flickrProgress.setVisible(false);
+                finishFlickrBtn.setDisable(false);
+                updateImages();
+            });
+        }
+        else {
+            _alert = _alertGenerator.newAlert("Nothing selected", "Please choose an audio file", "Select an audio file by highlighting a file on the list and pressing select", "error");
+            _alert.showAndWait();
+        }
     }
 
     /*=========================== END OF AUDIO PANE LOGIC ===============================*/
@@ -612,8 +669,13 @@ public class mainController implements Initializable {
 
     //--------------------------------- finishFlickrBtn Logic -----------------------------------------
 
-    @FXML void finishFlickrBtnPressed(ActionEvent event) {
-        //FINAL CREATION COMMANDS
+    @FXML void finishFlickrBtnPressed(ActionEvent event) throws Throwable {
+        if(creationNameField.getText().isEmpty() || !isAlphanumeric(creationNameField.getText()) || !isAlphanumeric2(creationNameField.getText())){
+            _alert = _alertGenerator.newAlert("Invalid Input", "Empty field", "Please enter a name for this creation", "error");
+            _alert.showAndWait();
+        }
+        List<Integer> indexes = getSelectedImages();
+
     }
 
     /*=========================== END OF IMAGE PANE LOGIC ===============================*/
@@ -831,7 +893,46 @@ public class mainController implements Initializable {
             _audioFileName = _audioFileName + _path + "/" + s + ".wav ";
             count++;
         }
+        System.out.println("aud file= " + _audioFileName);
         return count;
+    }
+
+    public void updateImages() {
+        File imagesDir = new File(_path + "/temp");
+        File[] imagesList = imagesDir.listFiles();
+        for(int i = 0; i < images.length; i++){
+            Image image = new Image(imagesList[i].toURI().toString());
+            images[i].setImage(image);
+        }
+    }
+
+    public List<Integer> getSelectedImages() {
+        List<Integer> indexes = null;
+        for(int i  = 0; i < imageButtons.length; i++) {
+            if(imageButtons[i].isSelected()){
+                indexes.add(i);
+            }
+        }
+        return indexes;
+    }
+
+    public boolean isAlphanumeric2(String str) {
+        for (int i=0; i<str.length(); i++) {
+            char c = str.charAt(i);
+            if (c < 0x30 || (c >= 0x3a && c <= 0x40) || (c > 0x5a && c <= 0x60) || c > 0x7a)
+                return false;
+        }
+        return true;
+    }
+
+    public boolean isAlphanumeric(String str) {
+        for (int i=0; i<str.length(); i++) {
+            char c = str.charAt(i);
+            if (!Character.isDigit(c) && !Character.isLetter(c))
+                return false;
+        }
+
+        return true;
     }
 }
 
