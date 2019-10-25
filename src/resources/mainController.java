@@ -69,7 +69,7 @@ public class mainController implements Initializable {
     @FXML private ListView<String> audioCreationsList;
     @FXML private Button previewAudioBtn;
     @FXML private Button stopPreviewAudioBtn;
-    @FXML private MediaPlayer previewPlayer;
+    @FXML public static MediaPlayer previewPlayer;
     @FXML private Button combineBtn;
     @FXML private Button selectAudioBtn;
     @FXML private Button deleteAudioBtn;
@@ -355,7 +355,7 @@ public class mainController implements Initializable {
 
     @FXML void searchNextBtnPressed(ActionEvent event) throws Throwable {
         audioDisplayText.setText(selectedTextArea.getText());
-        if(getWordCounts(selectedTextArea.getText()) > 40 || getWordCounts(selectedTextArea.getText()) < 10) {
+        if(getWordCounts(selectedTextArea.getText()) < 41 && getWordCounts(selectedTextArea.getText()) > 9) {
             createAudioPane.toFront();
         }
         else{
@@ -550,8 +550,7 @@ public class mainController implements Initializable {
         if(fileName == null){
             return;
         }
-        PreviewAudio.previewAudio(_path, fileName, previewPlayer);
-        System.out.println("PREVIEW PRESSED");
+        PreviewAudio.previewAudio(_path, fileName);
     }
 
     //--------------------------------- stopPreviewAudioBtn Logic ---------------------------------

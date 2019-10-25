@@ -1,6 +1,5 @@
 package helperClasses;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.scene.control.Alert;
 
 public class AlertGenerator {
