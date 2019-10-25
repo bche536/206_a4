@@ -75,64 +75,6 @@
                <children>
                   <StackPane prefWidth="1200.0">
                      <children>
-                        <AnchorPane fx:id="flickrPane" prefWidth="1200.0" styleClass="anchorBg">
-                           <children>
-                              <ToggleButton fx:id="imageBtn1" layoutX="24.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image1" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <ToggleButton fx:id="imageBtn2" layoutX="259.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image2" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <ToggleButton fx:id="imageBtn3" layoutX="495.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image3" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <ToggleButton fx:id="imageBtn4" layoutX="732.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image4" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <ToggleButton fx:id="imageBtn5" layoutX="972.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image5" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <ToggleButton fx:id="imageBtn6" layoutX="22.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image6" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <ToggleButton fx:id="imageBtn7" layoutX="257.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image7" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <ToggleButton fx:id="imageBtn8" layoutX="493.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image8" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <ToggleButton fx:id="imageBtn9" layoutX="730.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image9" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <ToggleButton fx:id="imageBtn10" layoutX="970.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
-                                 <graphic>
-                                    <ImageView fx:id="image10" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-                                 </graphic>
-                              </ToggleButton>
-                              <Button fx:id="finishFlickrBtn" layoutX="550.0" layoutY="742.0" minHeight="35.0" mnemonicParsing="false" onAction="#finishFlickrBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Finish" />
-                              <Label alignment="CENTER" layoutX="300.0" layoutY="43.0" prefHeight="55.0" prefWidth="600.0" styleClass="currentSearchTermLabel" text="Please click on the images that you would like in your creation" wrapText="true" />
-                              <TextField fx:id="creationNameField" layoutX="475.0" layoutY="692.0" prefHeight="30.0" prefWidth="250.0" promptText="Enter text here" styleClass="textAreas" />
-                              <Label fx:id="searchingLabel1" layoutX="448.0" layoutY="659.0" styleClass="defaultText" text="Please enter a name for your creation" />
-                           </children>
-                        </AnchorPane>
                         <AnchorPane fx:id="searchTextPane" prefWidth="1200.0" styleClass="anchorBg">
                            <children>
                               <Button fx:id="searchBtn" layoutX="782.0" layoutY="93.0" minHeight="50.0" mnemonicParsing="false" onAction="#searchBtnPressed" prefWidth="50.0" styleClass="defaultBtn">
@@ -204,6 +146,65 @@
                               <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="97.0" prefHeight="38.0" prefWidth="450.0" styleClass="txtLabels" text="Your selected text is displayed below..." textAlignment="CENTER" wrapText="true" />
                               <Button fx:id="audioHelpBtn" layoutX="19.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
                               <Button fx:id="audioBackBtn" layoutX="138.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioBackBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Go back" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="flickrPane" prefWidth="1200.0" styleClass="anchorBg">
+                           <children>
+                              <ToggleButton fx:id="imageBtn1" layoutX="24.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image1" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <ToggleButton fx:id="imageBtn2" layoutX="259.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image2" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <ToggleButton fx:id="imageBtn3" layoutX="495.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image3" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <ToggleButton fx:id="imageBtn4" layoutX="732.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image4" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <ToggleButton fx:id="imageBtn5" layoutX="972.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image5" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <ToggleButton fx:id="imageBtn6" layoutX="22.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image6" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <ToggleButton fx:id="imageBtn7" layoutX="257.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image7" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <ToggleButton fx:id="imageBtn8" layoutX="493.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image8" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <ToggleButton fx:id="imageBtn9" layoutX="730.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image9" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <ToggleButton fx:id="imageBtn10" layoutX="970.0" layoutY="403.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
+                                 <graphic>
+                                    <ImageView fx:id="image10" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
+                                 </graphic>
+                              </ToggleButton>
+                              <Button fx:id="finishFlickrBtn" layoutX="550.0" layoutY="742.0" minHeight="35.0" mnemonicParsing="false" onAction="#finishFlickrBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Finish" />
+                              <Label fx:id="flickrSceneLabel" alignment="CENTER" layoutX="24.0" layoutY="44.0" prefHeight="55.0" prefWidth="600.0" styleClass="currentSearchTermLabel" text="Please click on the images that you would like in your creation" wrapText="true" />
+                              <TextField fx:id="creationNameField" layoutX="475.0" layoutY="692.0" prefHeight="30.0" prefWidth="250.0" promptText="Enter text here" styleClass="textAreas" />
+                              <Label fx:id="searchingLabel1" layoutX="448.0" layoutY="659.0" styleClass="defaultText" text="Please enter a name for your creation" />
+                              <ProgressBar fx:id="searchProgress1" layoutX="683.0" layoutY="47.0" prefHeight="50.0" prefWidth="466.0" progress="0.0" />
                            </children>
                         </AnchorPane>
                      </children>

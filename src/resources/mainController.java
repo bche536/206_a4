@@ -81,6 +81,8 @@ public class mainController implements Initializable {
     /* ========================== START OF FLICKR PANE COMPONENTS ============================== */
 
     @FXML private AnchorPane flickrPane;
+    @FXML private Label flickrSceneLabel;
+    @FXML private ProgressBar flickrProgress;
     @FXML private ToggleButton imageBtn1;
     @FXML private ImageView image1;
     @FXML private ToggleButton imageBtn2;
@@ -568,7 +570,9 @@ public class mainController implements Initializable {
 
         }
         else {
-            selectedAudioLabel.setText("You have selected the audio file: " + _audioFileName);
+            String splitName[] = _audioFileName.split("/");
+            String displayFileName = splitName[splitName.length - 1];
+            selectedAudioLabel.setText("You have selected the audio file: " + displayFileName);
         }
     }
 
