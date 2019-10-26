@@ -14,13 +14,13 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,6 +44,15 @@ public class mainController implements Initializable {
 
     /**************************** START OF EXISTING CREATIONS TAB COMPONENTS **********************************/
 
+    @FXML private Button creationsPlayBtn;
+    @FXML private Button creationsDeleteBtn;
+    @FXML private Button creationsMediaPlayBtn;
+    @FXML private Button creationsMediaPauseBtn;
+    @FXML private Button creationsMediaStopBtn;
+    @FXML private StackPane mediaHolder;
+    @FXML private MediaView myCreationsPlayer;
+    @FXML private ListView existingCreationsList;
+    private MediaPlayer _existingCreationsMediaPlayer;
 
     /**************************** START OF EXISTING CREATIONS TAB COMPONENTS **********************************/
 
@@ -62,8 +71,6 @@ public class mainController implements Initializable {
     @FXML private TextArea selectedTextArea;
     @FXML private Button addTextBtn;
     @FXML private Button nextSearchBtn;
-//    @FXML private Button previewBtn;
-//    @FXML private Button clearSelectionBtn;
 
     /* ========================== END OF SEARCH PANE COMPONENTS ================================= */
 
@@ -128,10 +135,10 @@ public class mainController implements Initializable {
     @FXML private Button _help;
     @FXML private Button _play;
     @FXML private Button _confirmReviewOption;
-    @FXML private ComboBox<String> _ReviewOptions;
+    @FXML private ComboBox<String> _reviewOptions;
     @FXML private TableView<Creation> _tableViewForReview;
-    @FXML private TableColumn<Creation, String> _fileName; // column 1
-    @FXML private TableColumn<Creation, String> _keyword; // column 2
+    @FXML private TableColumn<Creation, String> _tableFileName; // column 1
+    @FXML private TableColumn<Creation, String> _tableKeyword; // column 2
     @FXML private TableColumn<Creation, String> _confidenceLevel; // column 3
     @FXML private TableColumn<Creation, String> _numberOfPlays; // column 4
 
@@ -149,6 +156,10 @@ public class mainController implements Initializable {
         String users_home = System.getProperty("user.home");
         _path = users_home.replace("\\", "/") + File.separator + myDirectory;
         new File(_path).mkdir();
+
+        //-------------------------- SET UP EXISTING CREATIONS PANE COMPONENTS -----------------------
+
+        refreshExistingCreationsList();
 
         //-------------------------- SET UP SEARCH PANE COMPONENTS -----------------------------------
 
@@ -177,7 +188,7 @@ public class mainController implements Initializable {
         audioFileNamePrompt.setHeaderText("Enter a name for audio file");
         audioFileNamePrompt.getDialogPane().lookupButton(ButtonType.CANCEL).setVisible(false);
         audioCreationsList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        refreshList();
+        refreshAudioList();
 
         //-------------------------- SET UP FLICKR PANE COMPONENTS ------------------------
 
@@ -207,66 +218,82 @@ public class mainController implements Initializable {
 
 
         //-------------------------- SET UP REVIEW TAB COMPONENTS -------------------------
-
-        /**
-         * mock data for test (should be delete later)
-         */
-        Creation creation1 = new Creation("apple1");
-        creation1.setKeyword("apple");
-        creation1.setConfidence("2");
-        creation1.increaseNumbeOfPlays();
-        creation1.increaseNumbeOfPlays();
-        _existingCreations.add(creation1);
-
-        Creation creation2 = new Creation("apple2");
-        creation2.setKeyword("apple");
-        creation2.increaseNumbeOfPlays();
-        creation2.increaseNumbeOfPlays();
-        _existingCreations.add(creation2);
-
-        Creation creation3 = new Creation("water");
-        creation3.setKeyword("water");
-        creation3.increaseNumbeOfPlays();
-        creation3.increaseNumbeOfPlays();
-        creation3.increaseNumbeOfPlays();
-        creation3.increaseNumbeOfPlays();
-        creation3.increaseNumbeOfPlays();
-        _existingCreations.add(creation3);
-
-        Creation creation4 = new Creation("apple3");
-        creation4.setKeyword("apple");
-        creation4.increaseNumbeOfPlays();
-        creation4.increaseNumbeOfPlays();
-        _existingCreations.add(creation4);
-
-        /**
-         *
-         *
-         *
-         *
-         *
-         *
-         */
-
-
         // set up combo box
-        _ReviewOptions.getItems().setAll("confidence first", "number of plays first");
-        _ReviewOptions.setValue("Sort by");
-
+        _reviewOptions.getItems().setAll("confidence first", "number of plays first");
+        _reviewOptions.setValue("Sort by");
 
         // set up table view
         _tableViewForReview.getItems().setAll(this._existingCreations);
-        _fileName.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getName()));
-        _keyword.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getKeyword()));
+        _tableFileName.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getName()));
+        _tableKeyword.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getKeyword()));
         _numberOfPlays
                 .setCellValueFactory(c -> new SimpleStringProperty(Integer.toString(c.getValue().getNumberOfPlays())));
         _confidenceLevel.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getConfidenceLevel()));
         editableConfidence();
+    }
 
+    /*************************** START OF EXISTING CREATIONS TAB LOGIC ***********************************/
+
+    @FXML
+    void creationsPlayBtnPressed(ActionEvent event) {
+        try {
+            String selectedFile = existingCreationsList.getSelectionModel().getSelectedItem().toString();
+            if(selectedFile == null){
+                //do nothing
+                return;
+            }
+            String path = _path + "/" + selectedFile + ".mp4";
+            Media media = new Media(new File(path).toURI().toString());
+            _existingCreationsMediaPlayer = new MediaPlayer(media);
+            myCreationsPlayer.setMediaPlayer(_existingCreationsMediaPlayer);
+            _existingCreationsMediaPlayer.setAutoPlay(true);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
 
+    @FXML void creationsDeleteBtnPressed(ActionEvent event) {
+        try {
+            String selectedFile = existingCreationsList.getSelectionModel().getSelectedItem().toString();
+            if(selectedFile == null){
+                //do nothing
+                return;
+            }
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + selectedFile + " ?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+            alert.showAndWait();
+
+            _alert = _alertGenerator.newAlert("File deletion", "Please confirm", "Do you want to delete the creation " + selectedFile + "?", "confirmation");
+
+            if (alert.getResult() == ButtonType.YES) {
+                String cmd = "rm -f " + _path + "/" + selectedFile + ".mp4";
+                ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
+                Process process = builder.start();
+                refreshExistingCreationsList();
+            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
+
+    @FXML void creationsMediaPauseBtnPressed(ActionEvent event) {
+        _existingCreationsMediaPlayer.pause();
+    }
+
+    @FXML void creationsMediaPlayBtnPressed(ActionEvent event) {
+        _existingCreationsMediaPlayer.play();
+    }
+
+    @FXML void creationsMediaStopBtnPressed(ActionEvent event) {
+        _existingCreationsMediaPlayer.stop();
+    }
+
+    /*************************** END OF EXISTING CREATIONS TAB LOGIC ***********************************/
+
+
     /*************************** START OF CREATION TAB LOGIC ***********************************/
+
 
     /*===========================START OF SEARCH PANE LOGIC  ==================================*/
 
@@ -437,7 +464,7 @@ public class mainController implements Initializable {
             _alert.showAndWait();
 
         } else {
-            if (isValidName(audioName)) {
+            if (isAlphanumeric(audioName) && isAlphanumeric2(audioName)) {
                 try {
                     // Write the selected text to a .txt file
                     WriteToTxtFile.writeTxt(_path, "Selected.txt", selectedTextArea.getText());
@@ -479,7 +506,7 @@ public class mainController implements Initializable {
                         e.printStackTrace();
                     }
 
-                    refreshList();
+                    refreshAudioList();
 
                 } else {
                     // use the default synthesizer
@@ -501,7 +528,7 @@ public class mainController implements Initializable {
                     // Alert the user that the audio file has been successfully created
                     _alert = _alertGenerator.newAlert("Audio completed", "Audio file generated", "The audio file " + audioName + " has been made", "information");
                     _alert.showAndWait();
-                    refreshList();
+                    refreshAudioList();
 
                 }
 
@@ -565,7 +592,7 @@ public class mainController implements Initializable {
                     // Alert the user that the audio file has been successfully created
                     _alert = _alertGenerator.newAlert("Audio completed", "Audio file generated", "THe audio file" + audioName + " has been made", "information");
                     _alert.showAndWait();
-                    refreshList();
+                    refreshAudioList();
 
                 } else {
                     //Audio file already exists so alert the user
@@ -582,7 +609,7 @@ public class mainController implements Initializable {
             _alert.showAndWait();
 
         }
-        refreshList();
+        refreshAudioList();
     }
 
     //--------------------------------- previewAudioBtn Logic ---------------------------------
@@ -633,7 +660,7 @@ public class mainController implements Initializable {
                 file.delete();
 
             }
-            refreshList();
+            refreshAudioList();
 
         }
     }
@@ -745,6 +772,10 @@ public class mainController implements Initializable {
                     flickrProgress.progressProperty().unbind();
                     flickrSceneLabel.setText("Video creation is complete");
 
+                    Creation creation = new Creation(creationNameField.getText());
+                    creation.setKeyword(_searchTerm);
+                    _existingCreations.add(creation);
+
                     try {
                         _alert = _alertGenerator.newAlert("Creation success", "Video generation successful", "Click 'Ok' to return to the beginning", "information");
                     } catch (Throwable throwable) {
@@ -786,68 +817,6 @@ public class mainController implements Initializable {
 
     /************************** START OF REVIEW TAB LOGIC *************************************/
 
-    public void RankingWithConfidenceFirst(List<Creation> creations) {
-
-        Collections.sort(creations, new Comparator<Object>() {
-
-            public int compare(Object o1, Object o2) {
-
-                String x1 = ((Creation) o1).getConfidenceLevel();
-                String x2 = ((Creation) o2).getConfidenceLevel();
-                int sComp = x1.compareTo(x2);
-
-                if (sComp != 0) {
-                    return sComp;
-                }
-
-                Integer x3 = ((Creation) o1).getNumberOfPlays();
-                Integer x4 = ((Creation) o2).getNumberOfPlays();
-                return x3.compareTo(x4);
-            }});
-
-    }
-
-    public void RankingWithNumberOfPlaysFirst(List<Creation> creations) {
-
-        Collections.sort(creations, new Comparator<Object>() {
-
-            public int compare(Object o1, Object o2) {
-
-                Integer x1 = ((Creation) o1).getNumberOfPlays();
-                Integer x2 = ((Creation) o2).getNumberOfPlays();
-                int sComp = x1.compareTo(x2);
-
-                if (sComp != 0) {
-                    return sComp;
-                }
-
-                String x3 = ((Creation) o1).getConfidenceLevel();
-                String x4 = ((Creation) o2).getConfidenceLevel();
-                return x3.compareTo(x4);
-            }});
-
-    }
-
-
-
-    // link to the button (ok) _confirmReviewOption
-    @FXML
-    public void comboAction() {
-
-        if (_ReviewOptions.getValue().equals("confidence first")) {
-
-            RankingWithConfidenceFirst(_existingCreations);
-            _tableViewForReview.getItems().setAll(this._existingCreations);
-        }
-        if (_ReviewOptions.getValue().equals("number of plays first")) {
-
-            RankingWithNumberOfPlaysFirst(_existingCreations);
-            _tableViewForReview.getItems().setAll(this._existingCreations);
-        }
-
-    }
-
-
     public void editableConfidence() {
 
         _confidenceLevel.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -858,10 +827,12 @@ public class mainController implements Initializable {
             if (input.matches("[0-9]+")) {
                 if (Integer.parseInt(input) < 1 || Integer.parseInt(input) > 5) {
                     // show alert
-                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                    errorAlert.setHeaderText("Input not valid");
-                    errorAlert.setContentText("please enter a number between 1-5");
-                    Optional<ButtonType> option = errorAlert.showAndWait();
+                    try {
+                        _alert = _alertGenerator.newAlert("Invalid Input", "Invalid number range", "Enter a number between 1 to 5 inclusively", "error");
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                    Optional<ButtonType> option = _alert.showAndWait();
                     if (option.get() == ButtonType.OK) {
                         _tableViewForReview.getItems().setAll(this._existingCreations);
                     }
@@ -870,11 +841,12 @@ public class mainController implements Initializable {
                     e.getTableView().getItems().get(e.getTablePosition().getRow()).setConfidence(e.getNewValue());
                 }
             } else {
-
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setHeaderText("Input not valid");
-                errorAlert.setContentText("please enter a number between 1-5");
-                Optional<ButtonType> option = errorAlert.showAndWait();
+                try {
+                    _alert = _alertGenerator.newAlert("Invalid Input", "Invalid number range", "Enter a number between 1 to 5 inclusively", "error");
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+                Optional<ButtonType> option = _alert.showAndWait();
                 if (option.get() == ButtonType.OK) {
                     _tableViewForReview.getItems().setAll(this._existingCreations);
                 }
@@ -897,10 +869,10 @@ public class mainController implements Initializable {
         searchTextArea.clear();
         selectedTextArea.clear();
         _searchTerm = "";
-        String cmd = "rm -r " + _path + "/temp/";
+        String cmd = "rm -r " + _path + "/temp/ " + _path + "/*.wav";
         ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
         Process process = builder.start();
-        refreshList();
+        refreshAudioList();
     }
 
     // Counts the number of words in a string
@@ -920,14 +892,38 @@ public class mainController implements Initializable {
 
     }
 
-    public void refreshList() {
-        List<String> fileNames = getNameList();
+    public void refreshAudioList() {
+        List<String> fileNames = getAudioNameList();
         ObservableList<String> items = FXCollections.observableList(fileNames);
         audioCreationsList.setItems(items);
     }
 
+    public void refreshExistingCreationsList() {
+        List<String> fileNames = getVideoNameList();
+        ObservableList<String> items = FXCollections.observableList(fileNames);
+        existingCreationsList.setItems(items);
+    }
+
+    public List<String> getVideoNameList() {
+        try {
+            String cmd = "ls " + _path + "/" + " | grep mp4 | sort | cut -f1 -d'.'";
+            ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
+            Process process = builder.start();
+            InputStream stdout = process.getInputStream();
+            BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
+            List<String> fileNames = new ArrayList<String>();
+            String line = null;
+            while ((line = stdoutBuffered.readLine()) != null) {
+                fileNames.add(line);
+            }
+            return fileNames;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     // Gets a list of names from existing files
-    public List<String> getNameList() {
+    public List<String> getAudioNameList() {
         try {
             String cmd = "ls " + _path + "/" + " | grep wav | sort | cut -f1 -d'.'";
             ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
@@ -949,7 +945,7 @@ public class mainController implements Initializable {
     // Checks whether the name is valid
     public boolean isValidName(String InputName) {
         boolean IsExist = false;
-        List<String> fileNames = getNameList();
+        List<String> fileNames = getAudioNameList();
         for (int i = 0; i < fileNames.size(); i++) {
             if (InputName.equals(fileNames.get(i))) {
                 IsExist = true;

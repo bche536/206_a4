@@ -26,18 +26,22 @@
   <tabs>
     <Tab fx:id="myCreations" styleClass="tabBg" text="My creations">
       <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchorBg">
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="400.0" styleClass="anchorBg">
                <children>
-                  <MediaView fitHeight="320.0" fitWidth="480.0" layoutX="467.0" layoutY="94.0" />
-                  <HBox alignment="CENTER" layoutX="14.0" layoutY="494.0" prefHeight="50.0" prefWidth="360.0" spacing="50.0">
+                  <StackPane layoutX="520.0" layoutY="54.0" prefHeight="400.0" prefWidth="600.0" styleClass="mediaHolder">
                      <children>
-                        <Button minHeight="35.0" mnemonicParsing="false" prefWidth="100.0" styleClass="defaultBtn" text="Play" />
-                        <Button minHeight="35.0" mnemonicParsing="false" prefWidth="100.0" styleClass="defaultBtn" text="Delete" />
+                        <MediaView fx:id="myCreationsPlayer" fitHeight="375.0" fitWidth="575.0" styleClass="mediaPlayers" />
+                     </children>
+                  </StackPane>
+                  <HBox alignment="CENTER" layoutX="73.0" layoutY="494.0" prefHeight="50.0" prefWidth="360.0" spacing="50.0">
+                     <children>
+                        <Button fx:id="creationsPlayBtn" minHeight="35.0" mnemonicParsing="false" onAction="#creationsPlayBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Play" />
+                        <Button fx:id="creationsDeleteBtn" minHeight="35.0" mnemonicParsing="false" onAction="#creationsDeleteBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Delete" />
                      </children>
                   </HBox>
-                  <HBox alignment="CENTER" layoutX="467.0" layoutY="507.0" prefHeight="50.0" prefWidth="480.0" spacing="50.0">
+                  <HBox alignment="CENTER" layoutX="580.0" layoutY="494.0" prefHeight="50.0" prefWidth="480.0" spacing="50.0">
                      <children>
-                        <Button minHeight="35.0" mnemonicParsing="false" prefWidth="100.0" styleClass="defaultBtn">
+                        <Button fx:id="creationsMediaPlayBtn" minHeight="35.0" mnemonicParsing="false" onAction="#creationsMediaPlayBtnPressed" prefWidth="100.0" styleClass="defaultBtn">
                            <graphic>
                               <ImageView fitHeight="15.0" fitWidth="75.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -46,7 +50,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <Button layoutX="200.0" layoutY="18.0" minHeight="35.0" mnemonicParsing="false" prefWidth="100.0" styleClass="defaultBtn">
+                        <Button fx:id="creationsMediaPauseBtn" layoutX="200.0" layoutY="18.0" minHeight="35.0" mnemonicParsing="false" onAction="#creationsMediaPauseBtnPressed" prefWidth="100.0" styleClass="defaultBtn">
                            <graphic>
                               <ImageView fitHeight="25.0" fitWidth="75.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -55,17 +59,22 @@
                               </ImageView>
                            </graphic>
                         </Button>
+                        <Button fx:id="creationsMediaStopBtn" minHeight="35.0" mnemonicParsing="false" onAction="#creationsMediaStopBtnPressed" prefWidth="100.0" styleClass="defaultBtn">
+                           <graphic>
+                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../images/stop.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
                      </children>
                   </HBox>
-                  <TableView layoutX="14.0" layoutY="14.0" prefHeight="480.0" prefWidth="360.0" styleClass="myTable">
-                    <columns>
-                      <TableColumn prefWidth="75.0" text="Name" />
-                      <TableColumn prefWidth="75.0" text="Search Term" />
-                    </columns>
-                     <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                     </columnResizePolicy>
-                  </TableView>
+                  <ListView fx:id="existingCreationsList" layoutX="53.0" layoutY="54.0" prefHeight="400.0" prefWidth="400.0" />
+                  <Button fx:id="myCreationsHelpBtn" layoutX="14.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#myCreationsHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
+                  <Label fx:id="addTextLabel1" alignment="CENTER" layoutX="53.0" layoutY="583.0" prefHeight="100.0" prefWidth="400.0" styleClass="txtLabels" text="Please highlight a video by clicking on a creation in the list then choose to either 'Play' or 'Delete' the creation" textAlignment="CENTER" wrapText="true" />
+                  <Label fx:id="addTextLabel11" alignment="CENTER" layoutX="520.0" layoutY="583.0" prefHeight="100.0" prefWidth="600.0" styleClass="txtLabels" text="'Play' button to play/resume, 'Pause' button to pause, and 'Stop' to stop the video" textAlignment="CENTER" wrapText="true" />
+                  <Label alignment="CENTER" layoutX="520.0" layoutY="743.0" prefHeight="100.0" prefWidth="600.0" styleClass="currentSearchTermLabel" text="Don't forget to go to the review section to review your creations to improve your memory of your search terms!" textAlignment="CENTER" wrapText="true" />
                </children></AnchorPane>
       </content>
     </Tab>
@@ -75,79 +84,6 @@
                <children>
                   <StackPane prefWidth="1200.0">
                      <children>
-                        <AnchorPane fx:id="searchTextPane" prefWidth="1200.0" styleClass="anchorBg">
-                           <children>
-                              <Button fx:id="searchBtn" layoutX="782.0" layoutY="93.0" minHeight="50.0" mnemonicParsing="false" onAction="#searchBtnPressed" prefWidth="50.0" styleClass="defaultBtn">
-                                 <graphic>
-                                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../images/search.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                              </Button>
-                              <TextField fx:id="searchField" layoutX="367.0" layoutY="93.0" prefHeight="50.0" prefWidth="400.0" promptText="Enter text here" styleClass="searchField" />
-                              <TextArea fx:id="searchTextArea" layoutX="19.0" layoutY="281.0" prefHeight="350.0" prefWidth="475.0" promptText="Results from search text here..." styleClass="textAreas" wrapText="true" />
-                              <ProgressBar fx:id="searchProgress" layoutX="367.0" layoutY="187.0" prefHeight="50.0" prefWidth="466.0" progress="0.0" />
-                              <Label fx:id="searchingLabel" layoutX="508.0" layoutY="156.0" styleClass="defaultText" text="Seaching please wait..." />
-                              <TextArea fx:id="selectedTextArea" layoutX="708.0" layoutY="281.0" prefHeight="215.0" prefWidth="475.0" promptText="The text you want in your creation here..." styleClass="textAreas" wrapText="true" />
-                              <Label fx:id="addTextLabel" alignment="CENTER" layoutX="15.0" layoutY="669.0" prefHeight="100.0" prefWidth="475.0" styleClass="txtLabels" text="Please highlight the words in the text above that you want to add to your creation then press 'Add' (10 - 40 words)" textAlignment="CENTER" wrapText="true" />
-                              <Button fx:id="addTextBtn" layoutX="550.0" layoutY="441.0" minHeight="35.0" mnemonicParsing="false" onAction="#addBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Add" />
-                              <Label alignment="CENTER" layoutX="708.0" layoutY="556.0" prefHeight="75.0" prefWidth="475.0" styleClass="txtLabels" text="Preview your selected text by pressing 'Preview' or clear your selected text by pressing 'Clear'" textAlignment="CENTER" wrapText="true" />
-                              <Button fx:id="clearSelectionBtn" layoutX="1000.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#clearSelectionBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Clear" />
-                              <Label fx:id="nextAudioLabel" alignment="CENTER" layoutX="708.0" layoutY="669.0" prefHeight="100.0" prefWidth="475.0" styleClass="txtLabels" text="Once you are happy with the text selected, click 'Next' to move onto creating the audio" textAlignment="CENTER" wrapText="true" />
-                              <Button fx:id="nextSearchBtn" layoutX="1083.0" layoutY="807.0" minHeight="35.0" mnemonicParsing="false" onAction="#searchNextBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Next" />
-                              <Button fx:id="previewSelectedBtn" layoutX="792.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#previewSelectedBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Preview" />
-                              <Label fx:id="searchPaneLabel" alignment="CENTER" layoutX="367.0" layoutY="22.0" prefHeight="55.0" prefWidth="466.0" styleClass="currentSearchTermLabel" text="Please search for a term for your creation" wrapText="true" />
-                              <Button fx:id="searchHelpBtn" layoutX="14.0" layoutY="807.0" minHeight="35.0" mnemonicParsing="false" onAction="#searchHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
-                           </children>
-                        </AnchorPane>
-                        <AnchorPane fx:id="createAudioPane" prefHeight="857.0" prefWidth="1200.0" styleClass="anchorBg">
-                           <children>
-                              <ListView fx:id="audioCreationsList" layoutX="579.0" layoutY="97.0" prefHeight="380.0" prefWidth="600.0">
-                                 <styleClass>
-                                    <String fx:value="audioList" />
-                                    <String fx:value="textAreas" />
-                                 </styleClass>
-                              </ListView>
-                              <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="429.0" prefHeight="105.0" prefWidth="450.0" styleClass="txtLabels" text="Please choose an an audio voice option below..." textAlignment="CENTER" wrapText="true" />
-                              <Label fx:id="audioPaneLabel" alignment="CENTER" layoutX="19.0" layoutY="22.0" prefHeight="55.0" prefWidth="450.0" styleClass="currentSearchTermLabel" text="Please configure your audio here" wrapText="true" />
-                              <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="554.0" prefHeight="105.0" prefWidth="450.0" styleClass="txtLabels" text="Please choose a background music option below..." textAlignment="CENTER" wrapText="true" />
-                              <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="680.0" prefHeight="110.0" prefWidth="450.0" styleClass="txtLabels" text="Click the 'Create' button to create your audio file to be displayed on the right" textAlignment="CENTER" wrapText="true" />
-                              <ChoiceBox fx:id="audioChoiceBox" layoutX="88.0" layoutY="482.0" prefWidth="300.0" styleClass="audioChoiceBox" />
-                              <ChoiceBox fx:id="backgroundChoiceBox" layoutX="88.0" layoutY="607.0" prefWidth="300.0" styleClass="audioChoiceBox" />
-                              <Button fx:id="createAudioBtn" layoutX="188.0" layoutY="743.0" minHeight="35.0" mnemonicParsing="false" onAction="#createAudioBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Create" />
-                              <Label alignment="TOP_CENTER" layoutX="577.0" layoutY="501.0" prefHeight="50.0" prefWidth="600.0" styleClass="txtLabels" textAlignment="CENTER" wrapText="true" />
-                              <Button fx:id="combineBtn" layoutX="746.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#combineBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Combine" />
-                              <Button fx:id="previewAudioBtn" layoutX="586.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#previewAudioBtnPressed" prefWidth="50.0" styleClass="defaultBtn">
-                                 <graphic>
-                                    <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../images/playicon.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic></Button>
-                              <Button fx:id="deleteAudioBtn" layoutX="1069.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#deleteAudioBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Delete" />
-                              <Button fx:id="stopPreviewBtn" layoutX="645.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#stopPreviewBtnPressed" prefWidth="50.0" styleClass="defaultBtn">
-                                 <graphic>
-                                    <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../images/stop.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                              </Button>
-                              <Label alignment="CENTER" layoutX="579.0" layoutY="572.0" prefHeight="150.0" prefWidth="600.0" styleClass="txtLabels" text="Hold CTRL and click to highlight the audio files you want to combine, then combine by pressing the 'Combine' button. If you are satisfied with your audio, please click to highlight it then press 'Select' to set your creation audio. Once you are ready to move onto selecting images for your creation, please press 'Next'." textAlignment="CENTER" wrapText="true" />
-                              <Button fx:id="selectAudioBtn" layoutX="912.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#selectAudioBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Select" />
-                              <Label alignment="CENTER" layoutX="577.0" layoutY="22.0" prefHeight="55.0" prefWidth="600.0" styleClass="currentSearchTermLabel" text="Your audio files" wrapText="true" />
-                              <Label fx:id="selectedAudioLabel" alignment="TOP_LEFT" layoutX="579.0" layoutY="743.0" prefHeight="100.0" prefWidth="600.0" styleClass="txtLabels" text="You have selected the audio file:" textAlignment="CENTER" wrapText="true" />
-                              <Button fx:id="nextAudioBtn" layoutX="829.0" layoutY="793.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioNextBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Next" />
-                              <TextArea fx:id="audioDisplayText" editable="false" layoutX="19.0" layoutY="157.0" prefHeight="250.0" prefWidth="450.0" styleClass="textAreas" wrapText="true" />
-                              <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="97.0" prefHeight="38.0" prefWidth="450.0" styleClass="txtLabels" text="Your selected text is displayed below..." textAlignment="CENTER" wrapText="true" />
-                              <Button fx:id="audioHelpBtn" layoutX="19.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
-                              <Button fx:id="audioBackBtn" layoutX="138.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioBackBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Go back" />
-                           </children>
-                        </AnchorPane>
                         <AnchorPane fx:id="flickrPane" prefWidth="1200.0" styleClass="anchorBg">
                            <children>
                               <ToggleButton fx:id="imageBtn1" layoutX="24.0" layoutY="141.0" mnemonicParsing="false" prefHeight="200.0" prefWidth="200.0" styleClass="imageHolder">
@@ -209,6 +145,79 @@
                               <Button fx:id="flickrHelpBtn" layoutX="19.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#flickrHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
                            </children>
                         </AnchorPane>
+                        <AnchorPane fx:id="createAudioPane" prefHeight="857.0" prefWidth="1200.0" styleClass="anchorBg">
+                           <children>
+                              <ListView fx:id="audioCreationsList" layoutX="579.0" layoutY="97.0" prefHeight="380.0" prefWidth="600.0">
+                                 <styleClass>
+                                    <String fx:value="audioList" />
+                                    <String fx:value="textAreas" />
+                                 </styleClass>
+                              </ListView>
+                              <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="429.0" prefHeight="105.0" prefWidth="450.0" styleClass="txtLabels" text="Please choose an an audio voice option below..." textAlignment="CENTER" wrapText="true" />
+                              <Label fx:id="audioPaneLabel" alignment="CENTER" layoutX="19.0" layoutY="22.0" prefHeight="55.0" prefWidth="450.0" styleClass="currentSearchTermLabel" text="Please configure your audio here" wrapText="true" />
+                              <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="554.0" prefHeight="105.0" prefWidth="450.0" styleClass="txtLabels" text="Please choose a background music option below..." textAlignment="CENTER" wrapText="true" />
+                              <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="680.0" prefHeight="110.0" prefWidth="450.0" styleClass="txtLabels" text="Click the 'Create' button to create your audio file to be displayed on the right" textAlignment="CENTER" wrapText="true" />
+                              <ChoiceBox fx:id="audioChoiceBox" layoutX="88.0" layoutY="482.0" prefWidth="300.0" styleClass="audioChoiceBox" />
+                              <ChoiceBox fx:id="backgroundChoiceBox" layoutX="88.0" layoutY="607.0" prefWidth="300.0" styleClass="audioChoiceBox" />
+                              <Button fx:id="createAudioBtn" layoutX="188.0" layoutY="743.0" minHeight="35.0" mnemonicParsing="false" onAction="#createAudioBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Create" />
+                              <Label alignment="TOP_CENTER" layoutX="577.0" layoutY="501.0" prefHeight="50.0" prefWidth="600.0" styleClass="txtLabels" textAlignment="CENTER" wrapText="true" />
+                              <Button fx:id="combineBtn" layoutX="746.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#combineBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Combine" />
+                              <Button fx:id="previewAudioBtn" layoutX="586.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#previewAudioBtnPressed" prefWidth="50.0" styleClass="defaultBtn">
+                                 <graphic>
+                                    <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/playicon.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic></Button>
+                              <Button fx:id="deleteAudioBtn" layoutX="1069.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#deleteAudioBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Delete" />
+                              <Button fx:id="stopPreviewBtn" layoutX="645.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#stopPreviewBtnPressed" prefWidth="50.0" styleClass="defaultBtn">
+                                 <graphic>
+                                    <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/stop.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                              <Label alignment="CENTER" layoutX="579.0" layoutY="572.0" prefHeight="150.0" prefWidth="600.0" styleClass="txtLabels" text="Hold CTRL and click to highlight the audio files you want to combine, then combine by pressing the 'Combine' button. If you are satisfied with your audio, please click to highlight it then press 'Select' to set your creation audio. Once you are ready to move onto selecting images for your creation, please press 'Next'." textAlignment="CENTER" wrapText="true" />
+                              <Button fx:id="selectAudioBtn" layoutX="912.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#selectAudioBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Select" />
+                              <Label alignment="CENTER" layoutX="577.0" layoutY="22.0" prefHeight="55.0" prefWidth="600.0" styleClass="currentSearchTermLabel" text="Your audio files" wrapText="true" />
+                              <Label fx:id="selectedAudioLabel" alignment="TOP_LEFT" layoutX="579.0" layoutY="743.0" prefHeight="100.0" prefWidth="600.0" styleClass="txtLabels" text="You have selected the audio file:" textAlignment="CENTER" wrapText="true" />
+                              <Button fx:id="nextAudioBtn" layoutX="829.0" layoutY="793.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioNextBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Next" />
+                              <TextArea fx:id="audioDisplayText" editable="false" layoutX="19.0" layoutY="157.0" prefHeight="250.0" prefWidth="450.0" styleClass="textAreas" wrapText="true" />
+                              <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="97.0" prefHeight="38.0" prefWidth="450.0" styleClass="txtLabels" text="Your selected text is displayed below..." textAlignment="CENTER" wrapText="true" />
+                              <Button fx:id="audioHelpBtn" layoutX="19.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
+                              <Button fx:id="audioBackBtn" layoutX="138.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioBackBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Go back" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="searchTextPane" prefWidth="1200.0" styleClass="anchorBg">
+                           <children>
+                              <Button fx:id="searchBtn" defaultButton="true" layoutX="782.0" layoutY="93.0" minHeight="50.0" mnemonicParsing="false" onAction="#searchBtnPressed" prefWidth="50.0" styleClass="defaultBtn">
+                                 <graphic>
+                                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/search.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                              <TextField fx:id="searchField" layoutX="367.0" layoutY="93.0" prefHeight="50.0" prefWidth="400.0" promptText="Enter text here" styleClass="searchField" />
+                              <TextArea fx:id="searchTextArea" layoutX="19.0" layoutY="281.0" prefHeight="350.0" prefWidth="475.0" promptText="Results from search text here..." styleClass="textAreas" wrapText="true" />
+                              <ProgressBar fx:id="searchProgress" layoutX="367.0" layoutY="187.0" prefHeight="50.0" prefWidth="466.0" progress="0.0" />
+                              <Label fx:id="searchingLabel" layoutX="508.0" layoutY="156.0" styleClass="defaultText" text="Seaching please wait..." />
+                              <TextArea fx:id="selectedTextArea" layoutX="708.0" layoutY="281.0" prefHeight="215.0" prefWidth="475.0" promptText="The text you want in your creation here..." styleClass="textAreas" wrapText="true" />
+                              <Label fx:id="addTextLabel" alignment="CENTER" layoutX="15.0" layoutY="669.0" prefHeight="100.0" prefWidth="475.0" styleClass="txtLabels" text="Please highlight the words in the text above that you want to add to your creation then press 'Add' (10 - 40 words)" textAlignment="CENTER" wrapText="true" />
+                              <Button fx:id="addTextBtn" layoutX="550.0" layoutY="441.0" minHeight="35.0" mnemonicParsing="false" onAction="#addBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Add" />
+                              <Label alignment="CENTER" layoutX="708.0" layoutY="556.0" prefHeight="75.0" prefWidth="475.0" styleClass="txtLabels" text="Preview your selected text by pressing 'Preview' or clear your selected text by pressing 'Clear'" textAlignment="CENTER" wrapText="true" />
+                              <Button fx:id="clearSelectionBtn" layoutX="1000.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#clearSelectionBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Clear" />
+                              <Label fx:id="nextAudioLabel" alignment="CENTER" layoutX="708.0" layoutY="669.0" prefHeight="100.0" prefWidth="475.0" styleClass="txtLabels" text="Once you are happy with the text selected, click 'Next' to move onto creating the audio" textAlignment="CENTER" wrapText="true" />
+                              <Button fx:id="nextSearchBtn" layoutX="1083.0" layoutY="807.0" minHeight="35.0" mnemonicParsing="false" onAction="#searchNextBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Next" />
+                              <Button fx:id="previewSelectedBtn" layoutX="792.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#previewSelectedBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Preview" />
+                              <Label fx:id="searchPaneLabel" alignment="CENTER" layoutX="367.0" layoutY="22.0" prefHeight="55.0" prefWidth="466.0" styleClass="currentSearchTermLabel" text="Please search for a term for your creation" wrapText="true" />
+                              <Button fx:id="searchHelpBtn" layoutX="14.0" layoutY="807.0" minHeight="35.0" mnemonicParsing="false" onAction="#searchHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
+                           </children>
+                        </AnchorPane>
                      </children>
                   </StackPane>
                </children></AnchorPane>
@@ -220,13 +229,13 @@
                <children>
                   <TableView fx:id="_tableViewForReview" editable="true" layoutX="38.0" layoutY="83.0" prefHeight="346.0" prefWidth="493.0" styleClass="reviewTable">
                      <columns>
-                        <TableColumn fx:id="_fileName" prefWidth="125.0" text="File" />
-                        <TableColumn fx:id="_keyword" prefWidth="113.0" text="Keyword" />
+                        <TableColumn fx:id="_tableFileName" prefWidth="125.0" text="File" />
+                        <TableColumn fx:id="_tableKeyword" prefWidth="113.0" text="Keyword" />
                         <TableColumn fx:id="_confidenceLevel" prefWidth="110.0" text="Confidence" />
                         <TableColumn fx:id="_numberOfPlays" prefWidth="144.0" text="Number Of Plays" />
                      </columns>
                   </TableView>
-                  <ComboBox fx:id="_ReviewOptions" layoutX="39.0" layoutY="449.0" prefHeight="38.0" prefWidth="215.0" promptText="Sort by" styleClass="audioChoiceBox" />
+                  <ComboBox fx:id="_reviewOptions" layoutX="39.0" layoutY="449.0" prefHeight="38.0" prefWidth="215.0" promptText="Sort by" styleClass="audioChoiceBox" />
                   <Button fx:id="_play" layoutX="406.0" layoutY="449.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="125.0" styleClass="defaultBtn" text="Play">
                      <font>
                         <Font size="18.0" />

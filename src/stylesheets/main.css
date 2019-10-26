@@ -140,6 +140,11 @@ table-view .column-header-background,
 
 /* -------------------------- General Styles -----------------*/
 
+.mediaHolder {
+    -fx-border-color: #2971d6;
+    -fx-border-width: 10px;
+    -fx-background-color: black;
+}
 
 .defaultText {
     -fx-font-size: 16px;
