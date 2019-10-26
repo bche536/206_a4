@@ -19,6 +19,9 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -135,7 +138,6 @@ public class mainController implements Initializable {
     @FXML private Button _help;
     @FXML private Button _play;
     @FXML private Button _confirmReviewOption;
-    @FXML private ComboBox<String> _reviewOptions;
     @FXML private TableView<Creation> _tableViewForReview;
     @FXML private TableColumn<Creation, String> _tableFileName; // column 1
     @FXML private TableColumn<Creation, String> _tableKeyword; // column 2
@@ -184,6 +186,12 @@ public class mainController implements Initializable {
         audioChoiceBox.getItems().add("AKL Accent");
         audioChoiceBox.setValue("Default Voice");
 
+        backgroundChoiceBox.getItems().add("forgottenland");
+        backgroundChoiceBox.getItems().add("magicyworld");
+        backgroundChoiceBox.getItems().add("newyorkcity");
+        backgroundChoiceBox.getItems().add("no background music");
+        backgroundChoiceBox.setValue("forgottenland");
+
         audioFileNamePrompt = new TextInputDialog();
         audioFileNamePrompt.setHeaderText("Enter a name for audio file");
         audioFileNamePrompt.getDialogPane().lookupButton(ButtonType.CANCEL).setVisible(false);
@@ -218,9 +226,6 @@ public class mainController implements Initializable {
 
 
         //-------------------------- SET UP REVIEW TAB COMPONENTS -------------------------
-        // set up combo box
-        _reviewOptions.getItems().setAll("confidence first", "number of plays first");
-        _reviewOptions.setValue("Sort by");
 
         // set up table view
         _tableViewForReview.getItems().setAll(this._existingCreations);
@@ -234,8 +239,12 @@ public class mainController implements Initializable {
 
     /*************************** START OF EXISTING CREATIONS TAB LOGIC ***********************************/
 
-    @FXML
-    void creationsPlayBtnPressed(ActionEvent event) {
+
+    @FXML void myCreationsHelpBtnPressed(ActionEvent event){
+
+    }
+
+    @FXML void creationsPlayBtnPressed(ActionEvent event) {
         try {
             String selectedFile = existingCreationsList.getSelectionModel().getSelectedItem().toString();
             if(selectedFile == null){
@@ -270,6 +279,8 @@ public class mainController implements Initializable {
                 String cmd = "rm -f " + _path + "/" + selectedFile + ".mp4";
                 ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
                 Process process = builder.start();
+                process.waitFor();
+                process.destroy();
                 refreshExistingCreationsList();
             }
         } catch (Throwable throwable) {
@@ -302,10 +313,10 @@ public class mainController implements Initializable {
     @FXML void searchBtnPressed(ActionEvent event) throws Throwable {
         //When the button is clicked, Get the search term
         _searchTerm = searchField.getText();
-        if (_searchTerm.isEmpty() || _searchTerm.trim().isEmpty()) {
+        if (_searchTerm.isEmpty() || _searchTerm.trim().isEmpty() || !isAlphanumeric(_searchTerm) || !isAlphanumeric2(_searchTerm)) {
 
             // Show alert if search term is empty
-            _alert = _alertGenerator.newAlert("Invalid Input", "Empty search term", "Please enter a term to search", "error");
+            _alert = _alertGenerator.newAlert("Invalid Input", "Invalid search term", "Please enter a valid term to search", "error");
             _alert.showAndWait();
 
         } else {
@@ -337,6 +348,9 @@ public class mainController implements Initializable {
                     String searchWikiLine = searchWikiStdoutBuffered.readLine();
                     String temp = _searchTerm + " not found :^(";
 
+                    searchWikiProcess.waitFor();
+                    searchWikiProcess.destroy();
+
                     searchProgress.progressProperty().unbind();
                     searchProgress.setProgress(0);
 
@@ -357,6 +371,8 @@ public class mainController implements Initializable {
                             while ((getTextLine = getTextStdoutBuffered.readLine()) != null) {
                                 _searchText = _searchText + getTextLine + "\n";
                             }
+                            getTextProcess.waitFor();
+                            getTextProcess.destroy();
                         } catch (IOException getTextException) {
                             getTextException.printStackTrace();
                         }
@@ -374,10 +390,6 @@ public class mainController implements Initializable {
             ExecutorService searchService = Executors.newFixedThreadPool(1);
             searchService.execute(searchWikiTask);
             searchService.shutdown();
-
-            ExecutorService flickrService = Executors.newFixedThreadPool(1);
-//            searchService.execute();
-            flickrService.shutdown();
         }
     }
 
@@ -408,6 +420,8 @@ public class mainController implements Initializable {
                 String previewCmd = "echo " + content + " | festival --tts";
                 ProcessBuilder previewPb = new ProcessBuilder("bash", "-c", previewCmd);
                 Process previewProcess = previewPb.start();
+                previewProcess.waitFor();
+                previewProcess.destroy();
 
             } catch (IOException previewException) {
                 previewException.printStackTrace();
@@ -459,12 +473,12 @@ public class mainController implements Initializable {
         String audioName = audioFileNamePrompt.getEditor().getText();
 
         // determine whether it is a valid name
-        if (audioName.isEmpty() || audioName.trim().isEmpty()) {
-            _alert = _alertGenerator.newAlert("Invalid name", "Empty input", "Please enter a name for this audio file", "error");
+        if (audioName.isEmpty() || audioName.trim().isEmpty() || !isAlphanumeric2(audioName) || !isAlphanumeric(audioName)) {
+            _alert = _alertGenerator.newAlert("Invalid name", "Empty input", "Please enter a valid name for this audio file", "error");
             _alert.showAndWait();
 
         } else {
-            if (isAlphanumeric(audioName) && isAlphanumeric2(audioName)) {
+            if (isValidName(audioName)) {
                 try {
                     // Write the selected text to a .txt file
                     WriteToTxtFile.writeTxt(_path, "Selected.txt", selectedTextArea.getText());
@@ -475,15 +489,10 @@ public class mainController implements Initializable {
                 // create the audio
                 if (synthesizer == "AKL Accent") {
                     try {
-                        //**************************************************************************
-                        //ADD IN NEW COMMAND WITH BACKGROUND MUSIC HERE and remove old command below
-                        //**************************************************************************
-                        String cmd = "text2wave -o " + _path + "/" + audioName + ".wav " + _path + "/"
-                                + "Selected.txt -eval " + _path + "/" + "akl.scm" + " 2> " + _path + "/"
-                                + "error.txt";
-                        ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
-                        Process process = pb.start();
-                        process.waitFor();
+                        AudioCreationTask audioTask = new AudioCreationTask(_path, backgroundChoiceBox.getValue(), audioName, synthesizer);
+
+                        ExecutorService executorService = Executors.newSingleThreadExecutor();
+                        executorService.submit(audioTask);
 
                         if (isCreated() == false) {
                             // The audio file they created has some unpronounceable words for this synthesiser
@@ -493,12 +502,23 @@ public class mainController implements Initializable {
                             String cmd1 = "rm " + _path + "/" + audioName + ".wav";
                             ProcessBuilder pb1 = new ProcessBuilder("bash", "-c", cmd1);
                             Process process1 = pb1.start();
+                            process1.waitFor();
+                            process1.destroy();
 
                         } else {
 
                             // show confirmation
-                            _alert = _alertGenerator.newAlert("Audio completed", "Audio file generated", "The audio file " + audioName + " has been made", "information");
-                            _alert.showAndWait();
+                            audioTask.setOnSucceeded((onCompletion) ->{
+                                executorService.shutdown();
+                                // Alert the user that the audio file has been successfully created
+                                try {
+                                    _alert = _alertGenerator.newAlert("Audio completed", "Audio file generated", "The audio file " + audioName + " has been made", "information");
+                                } catch (Throwable throwable) {
+                                    throwable.printStackTrace();
+                                }
+                                _alert.showAndWait();
+                                refreshAudioList();
+                            });
                         }
 
                     } catch (Exception e) {
@@ -510,25 +530,22 @@ public class mainController implements Initializable {
 
                 } else {
                     // use the default synthesizer
-                    try {
-                        // text2wave -eval "(voice_cmu_us_slt_arctic_hts)
-                        //**************************************************************************
-                        //ADD IN NEW COMMAND WITH BACKGROUND MUSIC HERE and remove old command below
-                        //**************************************************************************
-                        String cmd = "text2wave -o " + _path + "/" + audioName + ".wav " + _path + "/"
-                                + "Selected.txt -eval " + _path + "/" + "kal.scm";
-                        ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
-                        Process process = pb.start();
+                    AudioCreationTask audioTask = new AudioCreationTask(_path, backgroundChoiceBox.getValue(), audioName, synthesizer);
 
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                    ExecutorService executorService = Executors.newSingleThreadExecutor();
+                    executorService.submit(audioTask);
 
-                    // Alert the user that the audio file has been successfully created
-                    _alert = _alertGenerator.newAlert("Audio completed", "Audio file generated", "The audio file " + audioName + " has been made", "information");
-                    _alert.showAndWait();
-                    refreshAudioList();
+                    audioTask.setOnSucceeded((onCompletion) ->{
+                        executorService.shutdown();
+                        // Alert the user that the audio file has been successfully created
+                        try {
+                            _alert = _alertGenerator.newAlert("Audio completed", "Audio file generated", "The audio file " + audioName + " has been made", "information");
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
+                        }
+                        _alert.showAndWait();
+                        refreshAudioList();
+                    });
 
                 }
 
@@ -585,6 +602,8 @@ public class mainController implements Initializable {
 
                         ProcessBuilder pb = new ProcessBuilder("bash", "-c", soxCmd);
                         Process process = pb.start();
+                        process.waitFor();
+                        process.destroy();
 
                     } catch (IOException invalidSoxCmdException) {
                         invalidSoxCmdException.printStackTrace();
@@ -689,6 +708,7 @@ public class mainController implements Initializable {
 
             //When the thread finished its task prompt the user for a name for the file
             flickrTask.setOnSucceeded((succeededEvent) -> {
+                _flickrService.shutdown();
                 for(int i = 0; i < images.length; i++){
                     images[i].setVisible(true);
                 }
@@ -712,11 +732,12 @@ public class mainController implements Initializable {
     //--------------------------------- finishFlickrBtn Logic -----------------------------------------
 
     @FXML void finishFlickrBtnPressed(ActionEvent event) throws Throwable {
-        String cmd = "test -e " + _path + "/" + creationNameField.getText();
+        String cmd = "test -e " + _path + "/" + creationNameField.getText() +".mp4";
         ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
         Process process = builder.start();
         process.waitFor();
         int exitVal = process.exitValue();
+        process.destroy();
 
         if(creationNameField.getText().isEmpty() || !isAlphanumeric(creationNameField.getText()) || !isAlphanumeric2(creationNameField.getText())){
             _alert = _alertGenerator.newAlert("Invalid Input", "Invalid characaters", "Please enter a name for this creation that is alphanumeric", "error");
@@ -742,18 +763,18 @@ public class mainController implements Initializable {
                 System.out.println(num);
                 removeUnselectedImages();
                 _audioFileName = _audioFileName.substring(0, _audioFileName.length() - 1);
-                CreateVideoTask flickrTask = new CreateVideoTask(creationNameField.getText(), _searchTerm, _audioFileName, _path, num);
+                CreateVideoTask videoTask = new CreateVideoTask(creationNameField.getText(), _searchTerm, _audioFileName, _path, num);
 
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
-                executorService.submit(flickrTask);
+                executorService.submit(videoTask);
 
-                flickrTask.setOnRunning((whileRunning) -> {
+                videoTask.setOnRunning((whileRunning) -> {
                     flickrProgress.setVisible(true);
-                    flickrProgress.progressProperty().bind(flickrTask.progressProperty());
+                    flickrProgress.progressProperty().bind(videoTask.progressProperty());
                     flickrSceneLabel.setText("Generating video please wait...");
                 });
 
-                flickrTask.setOnCancelled((onCancel) -> {
+                videoTask.setOnCancelled((onCancel) -> {
                     String cancelCmd = "rm -r " + _path + "/temp/";
                     ProcessBuilder cancelBuilder = new ProcessBuilder("bash", "-c", cmd);
                     try {
@@ -767,7 +788,9 @@ public class mainController implements Initializable {
                     flickrSceneLabel.setText("Video creation interrupted, please try again");
                 });
 
-                flickrTask.setOnSucceeded((whenFinished) -> {
+                videoTask.setOnSucceeded((whenFinished) -> {
+                    executorService.shutdown();
+
                     flickrProgress.setVisible(false);
                     flickrProgress.progressProperty().unbind();
                     flickrSceneLabel.setText("Video creation is complete");
@@ -783,10 +806,12 @@ public class mainController implements Initializable {
                     }
                     _alert.showAndWait();
 
+                    refreshExistingCreationsList();
+
                     searchTextPane.toFront();
                     try {
                         clearAll();
-                    } catch (IOException e) {
+                    } catch (IOException | InterruptedException e) {
                         e.printStackTrace();
                     }
                 });
@@ -795,11 +820,14 @@ public class mainController implements Initializable {
 
     }
 
-    @FXML void flickrBackBtnPressed(ActionEvent event) throws IOException {
+    @FXML void flickrBackBtnPressed(ActionEvent event) throws IOException, InterruptedException {
         createAudioPane.toFront();
         String cmd = "rm -r " + _path + "/temp/";
         ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
         Process process = pb.start();
+        process.waitFor();
+        process.destroy();
+
     }
 
     @FXML void flickrHelpBtnPressed(ActionEvent event) {
@@ -816,6 +844,10 @@ public class mainController implements Initializable {
 
 
     /************************** START OF REVIEW TAB LOGIC *************************************/
+
+    @FXML public void reviewHelpBtnPressed(){
+
+    }
 
     public void editableConfidence() {
 
@@ -864,14 +896,18 @@ public class mainController implements Initializable {
 
     //--------------------------------- helper functions ---------------------------------------
 
-    public void clearAll() throws IOException {
+
+    public void clearAll() throws IOException, InterruptedException {
         searchField.clear();
         searchTextArea.clear();
         selectedTextArea.clear();
         _searchTerm = "";
+        creationNameField.clear();
         String cmd = "rm -r " + _path + "/temp/ " + _path + "/*.wav";
         ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
         Process process = builder.start();
+        process.waitFor();
+        process.destroy();
         refreshAudioList();
     }
 
@@ -916,8 +952,10 @@ public class mainController implements Initializable {
             while ((line = stdoutBuffered.readLine()) != null) {
                 fileNames.add(line);
             }
+            process.waitFor();
+            process.destroy();
             return fileNames;
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             return null;
         }
     }
@@ -935,8 +973,10 @@ public class mainController implements Initializable {
             while ((line = stdoutBuffered.readLine()) != null) {
                 fileNames.add(line);
             }
+            process.waitFor();
+            process.destroy();
             return fileNames;
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             return null;
         }
     }
@@ -961,7 +1001,7 @@ public class mainController implements Initializable {
     }
 
     // Checks if file already exists
-    public boolean isCreated() throws IOException {
+    public boolean isCreated() throws IOException, InterruptedException {
         String cmd = "cat " + _path + "/" + "error.txt";
         ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
         Process process = pb.start();
@@ -969,6 +1009,8 @@ public class mainController implements Initializable {
         BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
         String line = stdoutBuffered.readLine();
         String temp = "SIOD ERROR: could not open file /usr/share/festival/dicts/oald/oald_lts_rules.scm";
+        process.waitFor();
+        process.destroy();
 
         if (line == null) {
             return true;
