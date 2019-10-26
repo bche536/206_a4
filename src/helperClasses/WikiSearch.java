@@ -27,7 +27,7 @@ public class WikiSearch extends Task<Void> {
 		// determine whether it is valid input
 		Thread.sleep(300);
 		try {
-			String myDirectory = "206a3_team17"; // user Folder Name
+			String myDirectory = "206project_team17"; // user Folder Name
 			String users_home = System.getProperty("user.home");
 			String path = users_home.replace("\\", "/") + File.separator + myDirectory;
 			

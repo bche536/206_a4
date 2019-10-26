@@ -145,9 +145,10 @@ public class mainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //------------------------- Create the string directory to the working folder -----------
-        String myDirectory = "206a3_team17"; // user Folder Name
+        String myDirectory = "206project_team17"; // user Folder Name
         String users_home = System.getProperty("user.home");
         _path = users_home.replace("\\", "/") + File.separator + myDirectory;
+        new File(_path).mkdir();
 
         //-------------------------- SET UP SEARCH PANE COMPONENTS -----------------------------------
 
@@ -160,7 +161,13 @@ public class mainController implements Initializable {
         BooleanBinding isAddTextAreaEmpty = Bindings.isEmpty(searchTextArea.textProperty());
         addTextBtn.disableProperty().bind(isAddTextAreaEmpty);
 
-        //-------------------------- SET UP SEARCH PANE COMPONENTS ----------------------------
+        //-------------------------- SET UP AUDIO PANE COMPONENTS ----------------------------
+
+        try {
+            generateScm();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         audioChoiceBox.getItems().add("Default Voice");
         audioChoiceBox.getItems().add("AKL Accent");
@@ -439,13 +446,13 @@ public class mainController implements Initializable {
                     writingSelectedTextException.printStackTrace();
                 }
                 // create the audio
-                if (synthesizer == "AKL accent") {
+                if (synthesizer == "AKL Accent") {
                     try {
                         //**************************************************************************
                         //ADD IN NEW COMMAND WITH BACKGROUND MUSIC HERE and remove old command below
                         //**************************************************************************
                         String cmd = "text2wave -o " + _path + "/" + audioName + ".wav " + _path + "/"
-                                + "SelectedText.txt -eval " + _path + "/" + "akl.scm" + " 2> " + _path + "/"
+                                + "Selected.txt -eval " + _path + "/" + "akl.scm" + " 2> " + _path + "/"
                                 + "error.txt";
                         ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
                         Process process = pb.start();
@@ -482,7 +489,7 @@ public class mainController implements Initializable {
                         //ADD IN NEW COMMAND WITH BACKGROUND MUSIC HERE and remove old command below
                         //**************************************************************************
                         String cmd = "text2wave -o " + _path + "/" + audioName + ".wav " + _path + "/"
-                                + "SelectedText.txt -eval " + _path + "/" + "kal.scm";
+                                + "Selected.txt -eval " + _path + "/" + "kal.scm";
                         ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
                         Process process = pb.start();
 
@@ -604,7 +611,7 @@ public class mainController implements Initializable {
 
         }
         else {
-            //getSelectedAudioCreationsCOunt() method updates the _audioFileName field which is the location of the audioFile to be used
+            //getSelectedAudioCreationsCount() method updates the _audioFileName field which is the location of the audioFile to be used
             String splitName[] = _audioFileName.split("/");
             String displayFileName = splitName[splitName.length - 1];
             selectedAudioLabel.setText("You have selected the audio file: " + displayFileName);
@@ -641,7 +648,7 @@ public class mainController implements Initializable {
             finishFlickrBtn.setDisable(true);
             flickrPane.toFront();
             //When input is valid, make a new task and submit to ExecutorServices and wait
-            flickrClass flickrTask = new flickrClass(_searchTerm, _path);
+            FlickrClass flickrTask = new FlickrClass(_searchTerm, _path);
             _flickrService = Executors.newSingleThreadExecutor();
             _flickrService.submit(flickrTask);
 
@@ -678,17 +685,21 @@ public class mainController implements Initializable {
     //--------------------------------- finishFlickrBtn Logic -----------------------------------------
 
     @FXML void finishFlickrBtnPressed(ActionEvent event) throws Throwable {
+        String cmd = "test -e " + _path + "/" + creationNameField.getText();
+        ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
+        Process process = builder.start();
+        process.waitFor();
+        int exitVal = process.exitValue();
+
         if(creationNameField.getText().isEmpty() || !isAlphanumeric(creationNameField.getText()) || !isAlphanumeric2(creationNameField.getText())){
             _alert = _alertGenerator.newAlert("Invalid Input", "Invalid characaters", "Please enter a name for this creation that is alphanumeric", "error");
             _alert.showAndWait();
         }
+        else if(exitVal == 0){
+            _alert = _alertGenerator.newAlert("Invalid input", "Duplicate file", "The creation name you have entered already exists", "error");
+            _alert.showAndWait();
+        }
         else {
-            String cmd = "mkdir " + _path + "/temp/selectedImages";
-            ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
-            Process process = pb.start();
-            List<Image> selectedImages = getSelectedImages();
-            Path targetDir = Paths.get(_path + "/temp/selectedImages");
-
             if(getSelectedImages() == null) {
                 _alert = _alertGenerator.newAlert("No images", "No images selected", "You have not selected any images, do you want to create a blank creation?", "confirmation");
                 _alert.showAndWait();
@@ -699,11 +710,55 @@ public class mainController implements Initializable {
                     //do nothing
                 }
             }
-            else{
-                for(int i  = 0; i < selectedImages.size(); i++) {
-                    Path sourceDir = Paths.get(selectedImages.get(i).impl_getUrl());
-                    Files.copy(sourceDir, targetDir);
-                }
+            else {
+                int num = getSelectedImages().size();
+                System.out.println(num);
+                removeUnselectedImages();
+                _audioFileName = _audioFileName.substring(0, _audioFileName.length() - 1);
+                CreateVideoTask flickrTask = new CreateVideoTask(creationNameField.getText(), _searchTerm, _audioFileName, _path, num);
+
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                executorService.submit(flickrTask);
+
+                flickrTask.setOnRunning((whileRunning) -> {
+                    flickrProgress.setVisible(true);
+                    flickrProgress.progressProperty().bind(flickrTask.progressProperty());
+                    flickrSceneLabel.setText("Generating video please wait...");
+                });
+
+                flickrTask.setOnCancelled((onCancel) -> {
+                    String cancelCmd = "rm -r " + _path + "/temp/";
+                    ProcessBuilder cancelBuilder = new ProcessBuilder("bash", "-c", cmd);
+                    try {
+                        Process cancelProcess = cancelBuilder.start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    flickrProgress.setVisible(false);
+                    flickrProgress.progressProperty().unbind();
+                    flickrSceneLabel.setText("Video creation interrupted, please try again");
+                });
+
+                flickrTask.setOnSucceeded((whenFinished) -> {
+                    flickrProgress.setVisible(false);
+                    flickrProgress.progressProperty().unbind();
+                    flickrSceneLabel.setText("Video creation is complete");
+
+                    try {
+                        _alert = _alertGenerator.newAlert("Creation success", "Video generation successful", "Click 'Ok' to return to the beginning", "information");
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                    _alert.showAndWait();
+
+                    searchTextPane.toFront();
+                    try {
+                        clearAll();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
         }
 
@@ -837,12 +892,14 @@ public class mainController implements Initializable {
 
     //--------------------------------- helper functions ---------------------------------------
 
-    public void clearSearchPane(ActionEvent event) {
+    public void clearAll() throws IOException {
         searchField.clear();
         searchTextArea.clear();
         selectedTextArea.clear();
         _searchTerm = "";
-        //add code to delete currently searchedTerm files
+        String cmd = "rm -r " + _path + "/temp/";
+        ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
+        Process process = builder.start();
         refreshList();
     }
 
@@ -926,6 +983,18 @@ public class mainController implements Initializable {
         }
     }
 
+    //Generates voice files
+    public void generateScm() throws IOException {
+        FileWriter fw1 = new FileWriter(_path + "/" + "akl.scm");
+        fw1.write("(voice_akl_nz_jdt_diphone)");
+        fw1.close();
+
+        FileWriter fw2 = new FileWriter(_path + "/" + "kal.scm");
+        fw2.write("(voice_kal_diphone)");
+        fw2.close();
+
+    }
+
     public int getSelectedAudioCreationsCount() {
         ObservableList<String> selectedItems = audioCreationsList.getSelectionModel().getSelectedItems();
         _audioFileName = "";
@@ -959,7 +1028,6 @@ public class mainController implements Initializable {
         if(count == 0){
             return null;
         }
-        List<Integer> indexes = null;
         List<Image> selectedImages = new ArrayList();
         //There is at least one image selected so run the loop
         for(int i  = 0; i < imageButtons.length; i++) {
@@ -968,6 +1036,37 @@ public class mainController implements Initializable {
             }
         }
         return selectedImages;
+    }
+
+    public List<Image> getUnselectedImages() {
+        int count = 0;
+        //Initial check if no images are selected
+        for(int i = 0; i < imageButtons.length; i++) {
+            if(imageButtons[i].isSelected()){
+                count++;
+            }
+        }
+        if(count == 0){
+            return null;
+        }
+        List<Image> unselectedImages = new ArrayList();
+        //There is at least one image selected so run the loop
+        for(int i  = 0; i < imageButtons.length; i++) {
+            if(!imageButtons[i].isSelected()){
+                unselectedImages.add(images[i].getImage());
+            }
+        }
+        return unselectedImages;
+    }
+
+    public void removeUnselectedImages() throws IOException {
+        List<Image> unselectedImages = getUnselectedImages();
+        for(int i = 0; i < unselectedImages.size(); i++){
+            String jpgPath =  unselectedImages.get(i).impl_getUrl();
+            System.out.println(jpgPath.substring(5));
+            File file = new File(jpgPath.substring(5));
+            file.delete();
+        }
     }
 
     public boolean isAlphanumeric2(String str) {
@@ -988,6 +1087,8 @@ public class mainController implements Initializable {
 
         return true;
     }
+
+
 }
 
 

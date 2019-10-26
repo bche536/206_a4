@@ -10,12 +10,12 @@ import com.flickr4java.flickr.*;
 import com.flickr4java.flickr.photos.*;
 import javafx.concurrent.Task;
 
-public class flickrClass extends Task<Void> {
+public class FlickrClass extends Task<Void> {
     private static int _num;
     private static String _searchTerm, _path;
 
 
-    public flickrClass(String searchTerm, String path){
+    public FlickrClass(String searchTerm, String path){
         _searchTerm = searchTerm;
         _num = 10;
         _path = path;
