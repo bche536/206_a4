@@ -790,6 +790,11 @@ public class mainController implements Initializable, Serializable {
         reviewMediaPlayer.setOnEndOfMedia(() -> {
             _currentlyPlaying.increaseNumberOfPlays();
             tableViewForReview.refresh();
+            try {
+                saveCreations(_existingCreations);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -870,6 +875,11 @@ public class mainController implements Initializable, Serializable {
                 } else {
                     // set the new value of confidence level
                     e.getTableView().getItems().get(e.getTablePosition().getRow()).setConfidence(e.getNewValue());
+                    try {
+                        saveCreations(_existingCreations);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             } else {
                 try {
