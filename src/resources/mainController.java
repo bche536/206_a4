@@ -335,8 +335,6 @@ public class mainController implements Initializable, Serializable {
                 String previewCmd = "echo " + content + " | festival --tts";
                 ProcessBuilder previewPb = new ProcessBuilder("bash", "-c", previewCmd);
                 Process previewProcess = previewPb.start();
-                previewProcess.waitFor();
-                previewProcess.destroy();
 
             } catch (IOException previewException) {
                 previewException.printStackTrace();
