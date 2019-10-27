@@ -1,7 +1,9 @@
 package helperClasses;
 
 
-public class Creation {
+import java.io.Serializable;
+
+public class Creation implements Serializable {
 
 	
 	private String _name;
@@ -9,10 +11,11 @@ public class Creation {
     private String _keyword;
     private int _numberOfPlays;
     
-    public Creation(String name) {
-        this._name = name;
-        this._numberOfPlays = 0;
-        this._confidenceLevel = "0";
+    public Creation(String name, String keyword) {
+        _name = name;
+        _keyword = keyword;
+        _numberOfPlays = 0;
+        _confidenceLevel = "0";
     }
 
     
@@ -20,11 +23,6 @@ public class Creation {
     public String getName() {
         return _name;
     }
-
-    public void setName(String str) {
-        _name = str;
-    }
-
 
     public String getConfidenceLevel() {
         return _confidenceLevel;
@@ -42,13 +40,12 @@ public class Creation {
         _keyword=keyword;
     }
     
-    public void increaseNumbeOfPlays() {
+    public void increaseNumberOfPlays() {
     	_numberOfPlays++;
     }
-    
-    
+
     public int getNumberOfPlays() {
     	return _numberOfPlays;
     }
-    
+
 }

@@ -1,12 +1,13 @@
-/*  @font-face {
-    src: url("/fonts/Raleway-SemiBold.ttf");
+@font-face {
+    src: url("/fonts/Raleway-Bold.ttf");
 }
 
 * {
     -fx-font-family: "Raleway", sans-serif;
 }
 
-*/
+
+
 
 
 
@@ -36,8 +37,8 @@
 }
 
 .myTab {
--fx-tab-min-width: 175px;
--fx-tab-max-width: 175px;
+-fx-tab-min-width: 250px;
+-fx-tab-max-width: 250px;
 /*    -fx-tab-min-height: 1.75em; /* 21 */
 /*    -fx-tab-max-height: 1.75em; /* 21 */
     -fx-tab-min-height:  35px;
@@ -139,6 +140,14 @@ table-view .column-header-background,
 
 
 /* -------------------------- General Styles -----------------*/
+
+
+.dialog-pane {
+    -fx-background-color: -fx-background;
+    -fx-padding: 0;
+    -fx-background-width: 400px;
+    -fx-background-height: 400px;
+}
 
 .mediaHolder {
     -fx-border-color: #2971d6;

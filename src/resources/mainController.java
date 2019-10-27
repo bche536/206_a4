@@ -14,50 +14,28 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class mainController implements Initializable {
-    //---------------------------------- Initialise helper classes ---------------------------------
+public class mainController implements Initializable, Serializable {
+    //---------------------------------- Helper classes ---------------------------------
     private AlertGenerator _alertGenerator = new AlertGenerator();
     private Alert _alert;
-
     private ExecutorService _flickrService;
 
     //---------------------------------- Query fields ----------------------------------------------
-    private String _path, _searchTerm, _searchText, _audioFilePath, _audioFileName;
+    private String _path, _searchTerm, _searchText, _audioFileName;
     private TextInputDialog audioFileNamePrompt;
 
     //---------------------------------- General fields --------------------------------------------
     private boolean _selectedPressed;
-
-
-    @FXML private Tab myCreations;
-
-    /**************************** START OF EXISTING CREATIONS TAB COMPONENTS **********************************/
-
-    @FXML private Button creationsPlayBtn;
-    @FXML private Button creationsDeleteBtn;
-    @FXML private Button creationsMediaPlayBtn;
-    @FXML private Button creationsMediaPauseBtn;
-    @FXML private Button creationsMediaStopBtn;
-    @FXML private StackPane mediaHolder;
-    @FXML private MediaView myCreationsPlayer;
-    @FXML private ListView existingCreationsList;
-    private MediaPlayer _existingCreationsMediaPlayer;
-
-    /**************************** START OF EXISTING CREATIONS TAB COMPONENTS **********************************/
 
 
     /**************************** START OF CREATION TAB COMPONENTS **********************************/
@@ -83,15 +61,8 @@ public class mainController implements Initializable {
     @FXML private TextArea audioDisplayText;
     @FXML private ChoiceBox<String> audioChoiceBox;
     @FXML private ChoiceBox<String> backgroundChoiceBox;
-    @FXML private Button createAudioBtn;
     @FXML private ListView<String> audioCreationsList;
-    @FXML private Button previewAudioBtn;
-    @FXML private Button stopPreviewAudioBtn;
     @FXML public static MediaPlayer previewPlayer;
-    @FXML private Button combineBtn;
-    @FXML private Button selectAudioBtn;
-    @FXML private Button deleteAudioBtn;
-    @FXML private Button audioNextBtn;
     @FXML private Label selectedAudioLabel;
 
     /* ========================== END OF AUDIO PANE COMPONENTS ================================= */
@@ -135,16 +106,16 @@ public class mainController implements Initializable {
 
     /**************************** START OF REVIEW TAB COMPONENTS **********************************/
 
-    @FXML private Button _help;
-    @FXML private Button _play;
-    @FXML private Button _confirmReviewOption;
-    @FXML private TableView<Creation> _tableViewForReview;
+    @FXML private TableView<Creation> tableViewForReview;
     @FXML private TableColumn<Creation, String> _tableFileName; // column 1
     @FXML private TableColumn<Creation, String> _tableKeyword; // column 2
     @FXML private TableColumn<Creation, String> _confidenceLevel; // column 3
     @FXML private TableColumn<Creation, String> _numberOfPlays; // column 4
-
     private List<Creation> _existingCreations = new ArrayList<Creation>();;
+
+    @FXML private MediaView reviewMediaView;
+    private MediaPlayer reviewMediaPlayer;
+    private Creation _currentlyPlaying;
 
 
     /**************************** END OF REVIEW TAB COMPONENTS **********************************/
@@ -159,9 +130,20 @@ public class mainController implements Initializable {
         _path = users_home.replace("\\", "/") + File.separator + myDirectory;
         new File(_path).mkdir();
 
-        //-------------------------- SET UP EXISTING CREATIONS PANE COMPONENTS -----------------------
+        //Create the creations.txt file which stores the object info if it doesn't exist
+        try {
+            genericProcess("touch " + _path + "/creations.txt");
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
 
-        refreshExistingCreationsList();
+        //Update the tableview with existing creations
+        try {
+            updateCreations();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         //-------------------------- SET UP SEARCH PANE COMPONENTS -----------------------------------
 
@@ -228,7 +210,7 @@ public class mainController implements Initializable {
         //-------------------------- SET UP REVIEW TAB COMPONENTS -------------------------
 
         // set up table view
-        _tableViewForReview.getItems().setAll(this._existingCreations);
+        tableViewForReview.getItems().setAll(this._existingCreations);
         _tableFileName.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getName()));
         _tableKeyword.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getKeyword()));
         _numberOfPlays
@@ -237,74 +219,7 @@ public class mainController implements Initializable {
         editableConfidence();
     }
 
-    /*************************** START OF EXISTING CREATIONS TAB LOGIC ***********************************/
-
-
-    @FXML void myCreationsHelpBtnPressed(ActionEvent event){
-
-    }
-
-    @FXML void creationsPlayBtnPressed(ActionEvent event) {
-        try {
-            String selectedFile = existingCreationsList.getSelectionModel().getSelectedItem().toString();
-            if(selectedFile == null){
-                //do nothing
-                return;
-            }
-            String path = _path + "/" + selectedFile + ".mp4";
-            Media media = new Media(new File(path).toURI().toString());
-            _existingCreationsMediaPlayer = new MediaPlayer(media);
-            myCreationsPlayer.setMediaPlayer(_existingCreationsMediaPlayer);
-            _existingCreationsMediaPlayer.setAutoPlay(true);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-
-    }
-
-    @FXML void creationsDeleteBtnPressed(ActionEvent event) {
-        try {
-            String selectedFile = existingCreationsList.getSelectionModel().getSelectedItem().toString();
-            if(selectedFile == null){
-                //do nothing
-                return;
-            }
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + selectedFile + " ?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
-            alert.showAndWait();
-
-            _alert = _alertGenerator.newAlert("File deletion", "Please confirm", "Do you want to delete the creation " + selectedFile + "?", "confirmation");
-
-            if (alert.getResult() == ButtonType.YES) {
-                String cmd = "rm -f " + _path + "/" + selectedFile + ".mp4";
-                ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
-                Process process = builder.start();
-                process.waitFor();
-                process.destroy();
-                refreshExistingCreationsList();
-            }
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
-    }
-
-    @FXML void creationsMediaPauseBtnPressed(ActionEvent event) {
-        _existingCreationsMediaPlayer.pause();
-    }
-
-    @FXML void creationsMediaPlayBtnPressed(ActionEvent event) {
-        _existingCreationsMediaPlayer.play();
-    }
-
-    @FXML void creationsMediaStopBtnPressed(ActionEvent event) {
-        _existingCreationsMediaPlayer.stop();
-    }
-
-    /*************************** END OF EXISTING CREATIONS TAB LOGIC ***********************************/
-
-
     /*************************** START OF CREATION TAB LOGIC ***********************************/
-
 
     /*===========================START OF SEARCH PANE LOGIC  ==================================*/
 
@@ -451,8 +366,13 @@ public class mainController implements Initializable {
 
     //--------------------------------- searchHelpBtn Logic -----------------------------------------
 
-    @FXML void searchHelpBtnPressed(ActionEvent event) {
-        //NEED TO SHOW INSTRUCTION ALERT
+    @FXML void searchHelpBtnPressed(ActionEvent event) throws Throwable {
+        _alert = _alertGenerator.newAlert("", "", "1. Enter a search term in the search box then press " +
+                "'Enter' or click on the 'Magnifying Glass' button to search\n\n2. Highlight the text from the left text box that you want " +
+                "in your creation by dragging your mouse over the text you want\n\n3. Click the 'Add' button to add your text to the right textbox\n\n" +
+                "4. Press the 'Preview' or 'Clear' button to either: Preview the audio or Clear your selection\n\n" +
+                "5. Press the 'Next' button to move onto the audio section when you are happy with your text", "information");
+        _alert.show();
     }
 
 
@@ -460,8 +380,6 @@ public class mainController implements Initializable {
 
 
     /*=========================== START OF AUDIO PANE LOGIC ===============================*/
-
-
 
     //--------------------------------- createAudioBtn Logic ----------------------------------
 
@@ -567,8 +485,14 @@ public class mainController implements Initializable {
 
     //--------------------------------- audioHelpBtnPressed Logic --------------------------------------
 
-    @FXML void audioHelpBtnPressed(ActionEvent event) {
-
+    @FXML void audioHelpBtnPressed(ActionEvent event) throws Throwable {
+        _alert = _alertGenerator.newAlert("", "", "1. Your selected will be displayed in the left textbox\n\n" +
+                "2. Below the textbox are two dropdown boxes where you can select your speech voice and background music\n\n" +
+                "3. Once you are happy with your options, click the 'Create' button and wait for your audio file to be created\n\n" +
+                "4. Select your audio file by clicking on the list then press the 'Preview' or 'Delete' button below the audio list to either: Preview the audio or Delete your selection\n\n" +
+                "5. Once you are happy with your audio file, select the audio file you want by clicking on the list then pressing the 'Select' button\n\n" +
+                "6. You will be able to see your selected audio file above the 'Next' button, once you are happy press the 'Next' button to continue to select your images", "information");
+        _alert.show();
     }
 
     //--------------------------------- combineBtn Logic --------------------------------------
@@ -716,6 +640,7 @@ public class mainController implements Initializable {
                 flickrProgress.progressProperty().unbind();
                 flickrProgress.setVisible(false);
                 finishFlickrBtn.setDisable(false);
+                searchingLabel.setText("");
                 updateImages();
             });
         }
@@ -749,25 +674,19 @@ public class mainController implements Initializable {
         }
         else {
             if(getSelectedImages() == null) {
-                _alert = _alertGenerator.newAlert("No images", "No images selected", "You have not selected any images, do you want to create a blank creation?", "confirmation");
+                _alert = _alertGenerator.newAlert("No images", "No images selected", "You have not selected any images, please select at least one image", "Error");
                 _alert.showAndWait();
-                if(_alert.getResult() == ButtonType.YES){
-                    //create video with no images
-                }
-                else{
-                    //do nothing
-                }
+                return;
             }
             else {
                 int num = getSelectedImages().size();
                 System.out.println(num);
                 removeUnselectedImages();
                 _audioFileName = _audioFileName.substring(0, _audioFileName.length() - 1);
-                CreateVideoTask videoTask = new CreateVideoTask(creationNameField.getText(), _searchTerm, _audioFileName, _path, num);
 
+                CreateVideoTask videoTask = new CreateVideoTask(creationNameField.getText(), _searchTerm, _audioFileName, _path, num);
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                 executorService.submit(videoTask);
-
                 videoTask.setOnRunning((whileRunning) -> {
                     flickrProgress.setVisible(true);
                     flickrProgress.progressProperty().bind(videoTask.progressProperty());
@@ -776,10 +695,12 @@ public class mainController implements Initializable {
 
                 videoTask.setOnCancelled((onCancel) -> {
                     String cancelCmd = "rm -r " + _path + "/temp/";
-                    ProcessBuilder cancelBuilder = new ProcessBuilder("bash", "-c", cmd);
+                    ProcessBuilder cancelBuilder = new ProcessBuilder("bash", "-c", cancelCmd);
                     try {
                         Process cancelProcess = cancelBuilder.start();
-                    } catch (IOException e) {
+                        cancelProcess.waitFor();
+                        cancelProcess.destroy();
+                    } catch (IOException | InterruptedException e) {
                         e.printStackTrace();
                     }
 
@@ -790,24 +711,25 @@ public class mainController implements Initializable {
 
                 videoTask.setOnSucceeded((whenFinished) -> {
                     executorService.shutdown();
-
                     flickrProgress.setVisible(false);
                     flickrProgress.progressProperty().unbind();
                     flickrSceneLabel.setText("Video creation is complete");
 
-                    Creation creation = new Creation(creationNameField.getText());
-                    creation.setKeyword(_searchTerm);
+                    Creation creation = new Creation(creationNameField.getText(), _searchTerm);
                     _existingCreations.add(creation);
-
+                    tableViewForReview.getItems().clear();
+                    tableViewForReview.getItems().addAll(_existingCreations);
+                    try {
+                        saveCreations(_existingCreations);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     try {
                         _alert = _alertGenerator.newAlert("Creation success", "Video generation successful", "Click 'Ok' to return to the beginning", "information");
                     } catch (Throwable throwable) {
                         throwable.printStackTrace();
                     }
                     _alert.showAndWait();
-
-                    refreshExistingCreationsList();
-
                     searchTextPane.toFront();
                     try {
                         clearAll();
@@ -830,8 +752,13 @@ public class mainController implements Initializable {
 
     }
 
-    @FXML void flickrHelpBtnPressed(ActionEvent event) {
-
+    @FXML void flickrHelpBtnPressed(ActionEvent event) throws Throwable {
+        _alert = _alertGenerator.newAlert("", "", "1. Click on the images that you want\n\n" +
+                "2. Selected images will be highlighted/have a blue border around them\n\n" +
+                "3. Please choose at least one image\n\n" +
+                "4. Once you are happy with your images, enter a creation name in the textfield below\n\n" +
+                "5. Click the 'Finish' button to create your video\n\n", "information");
+        _alert.show();
     }
 
     /*=========================== END OF FLICKR PANE LOGIC ===============================*/
@@ -844,13 +771,87 @@ public class mainController implements Initializable {
 
 
     /************************** START OF REVIEW TAB LOGIC *************************************/
+    @FXML void reviewStartPlayBtnPressed(ActionEvent event) {
+        Creation selection = tableViewForReview.getSelectionModel().getSelectedItem();
+        if(selection == null){
+            //do nothing
+            return;
+        }
+        if(reviewMediaPlayer != null){
+            reviewMediaPlayer.stop();
+        }
+        _currentlyPlaying = selection;
+        String videoName = selection.getName();
 
-    @FXML public void reviewHelpBtnPressed(){
+        String path = _path + "/" + videoName + ".mp4";
+        Media media = new Media(new File(path).toURI().toString());
+        reviewMediaPlayer = new MediaPlayer(media);
+        reviewMediaView.setMediaPlayer(reviewMediaPlayer);
+        reviewMediaPlayer.setAutoPlay(true);
 
+        reviewMediaPlayer.setOnEndOfMedia(() -> {
+            _currentlyPlaying.increaseNumberOfPlays();
+            tableViewForReview.refresh();
+        });
+    }
+
+    @FXML void reviewPlayBtnPressed(ActionEvent event) {
+        reviewMediaPlayer.play();
+    }
+
+    @FXML void reviewPauseBtnPressed(ActionEvent event) {
+        reviewMediaPlayer.pause();
+    }
+
+    @FXML void reviewStopBtnPressed(ActionEvent event) {
+        reviewMediaPlayer.stop();
+    }
+
+    @FXML void reviewDeleteBtnPressed(ActionEvent event) {
+        System.out.println("hello PRESSED");
+        Creation selection = tableViewForReview.getSelectionModel().getSelectedItem();
+        String videoName = selection.getName();
+        System.out.println(selection);
+        System.out.println(videoName);
+
+        try {
+            if(selection == null){
+                System.out.println("hello");
+                //do nothing
+                return;
+            }
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + videoName + " ?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+            alert.showAndWait();
+
+            if (alert.getResult() == ButtonType.YES) {
+                String cmd = "rm " + _path + "/" + videoName + ".mp4 " + _path + "/creations.txt;touch " + _path + "/creations.txt";
+                System.out.println(cmd);
+                ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
+                Process process = builder.start();
+                process.waitFor();
+                process.destroy();
+                _existingCreations.remove(selection);
+
+                saveCreations(_existingCreations);
+                tableViewForReview.getItems().clear();
+                tableViewForReview.getItems().setAll(_existingCreations);
+            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
+
+    @FXML public void reviewHelpBtnPressed() throws Throwable {
+        _alert = _alertGenerator.newAlert("Active Learning Component", "", "1. Choose a creation that you want to play by clicking on the list\n\n" +
+                "2. Press the big 'Play' button on the button to load the video\n\n" +
+                "3. Under the video you will see three buttons 'Play, 'Pause' and 'Stop'\n\n" +
+                "4. You can edit your level of confidence by clicking on 'Confidence Level' column (only from the range 1-5)\n\n" +
+                "5. THe 'Number of plays' will only increase if you watch the whole video\n\n" +
+                "6. We encourage you to create more videos if you have a lot of 4's and 5's in your 'Confidence Levels'", "information");
+        _alert.show();
     }
 
     public void editableConfidence() {
-
         _confidenceLevel.setCellFactory(TextFieldTableCell.forTableColumn());
         _confidenceLevel.setOnEditCommit(e -> {
 
@@ -866,7 +867,7 @@ public class mainController implements Initializable {
                     }
                     Optional<ButtonType> option = _alert.showAndWait();
                     if (option.get() == ButtonType.OK) {
-                        _tableViewForReview.getItems().setAll(this._existingCreations);
+                        tableViewForReview.getItems().setAll(this._existingCreations);
                     }
                 } else {
                     // set the new value of confidence level
@@ -880,7 +881,7 @@ public class mainController implements Initializable {
                 }
                 Optional<ButtonType> option = _alert.showAndWait();
                 if (option.get() == ButtonType.OK) {
-                    _tableViewForReview.getItems().setAll(this._existingCreations);
+                    tableViewForReview.getItems().setAll(this._existingCreations);
                 }
             }
 
@@ -932,32 +933,6 @@ public class mainController implements Initializable {
         List<String> fileNames = getAudioNameList();
         ObservableList<String> items = FXCollections.observableList(fileNames);
         audioCreationsList.setItems(items);
-    }
-
-    public void refreshExistingCreationsList() {
-        List<String> fileNames = getVideoNameList();
-        ObservableList<String> items = FXCollections.observableList(fileNames);
-        existingCreationsList.setItems(items);
-    }
-
-    public List<String> getVideoNameList() {
-        try {
-            String cmd = "ls " + _path + "/" + " | grep mp4 | sort | cut -f1 -d'.'";
-            ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
-            Process process = builder.start();
-            InputStream stdout = process.getInputStream();
-            BufferedReader stdoutBuffered = new BufferedReader(new InputStreamReader(stdout));
-            List<String> fileNames = new ArrayList<String>();
-            String line = null;
-            while ((line = stdoutBuffered.readLine()) != null) {
-                fileNames.add(line);
-            }
-            process.waitFor();
-            process.destroy();
-            return fileNames;
-        } catch (IOException | InterruptedException e) {
-            return null;
-        }
     }
 
     // Gets a list of names from existing files
@@ -1107,6 +1082,53 @@ public class mainController implements Initializable {
         }
     }
 
+    public void saveCreations(List<Creation> creations) throws IOException {
+        File file = new File(_path + "/creations.txt");
+        file.delete();
+
+        FileOutputStream fileOutput = new FileOutputStream(file);
+        ObjectOutputStream objOutput = new ObjectOutputStream(fileOutput);
+
+        //Save and write the creation objs to a txt file
+        for (Creation c:creations){
+            objOutput.writeObject(c);
+        }
+
+        fileOutput.close();
+        objOutput.close();
+    }
+
+    public void updateCreations() throws IOException {
+        File file = new File(_path + "/creations.txt");
+
+        try {
+            FileInputStream fileInput = new FileInputStream(file);
+            ObjectInputStream objInput = new ObjectInputStream(fileInput);
+
+            boolean end = false;
+            while (!end) {
+                Creation c = (Creation) objInput.readObject();
+                if (c != null) {
+                    _existingCreations.add(c);
+                } else {
+                    end = true;
+                }
+            }
+            tableViewForReview.getItems().clear();
+            tableViewForReview.getItems().addAll(_existingCreations);
+
+            fileInput.close();
+            objInput.close();
+        }
+        catch (FileNotFoundException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (EOFException e){
+            //Expected output
+        }
+
+    }
+
     public boolean isAlphanumeric2(String str) {
         for (int i=0; i<str.length(); i++) {
             char c = str.charAt(i);
@@ -1124,6 +1146,13 @@ public class mainController implements Initializable {
         }
 
         return true;
+    }
+
+    public void genericProcess(String cmd) throws InterruptedException, IOException {
+        ProcessBuilder genericPb = new ProcessBuilder("bash", "-c" , cmd);
+        Process genericProcess = genericPb.start();
+        genericProcess.waitFor();
+        genericProcess.destroy();;
     }
 
 

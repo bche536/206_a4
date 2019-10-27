@@ -1,6 +1,7 @@
 package helperClasses;
 
 import javafx.scene.control.Alert;
+import javafx.scene.layout.Region;
 
 public class AlertGenerator {
     private String _title, _header , _content, _alertType;
@@ -13,6 +14,7 @@ public class AlertGenerator {
             alert.setTitle(title);
             alert.setTitle(header);
             alert.setContentText(content);
+            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
             return alert;
         }
         if(type.toLowerCase().equals("information")){
@@ -20,12 +22,14 @@ public class AlertGenerator {
             alert.setTitle(title);
             alert.setTitle(header);
             alert.setContentText(content);
+            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
             return alert;
         }        if(type.toLowerCase().equals("confirmation")){
             alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle(title);
             alert.setTitle(header);
             alert.setContentText(content);
+            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
             return alert;
         }
         System.out.println("No such Alert Type: " + type + " in this alertGenerator");

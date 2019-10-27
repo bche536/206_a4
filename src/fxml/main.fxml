@@ -23,60 +23,6 @@
 
 <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="900.0" minWidth="1200.0" prefHeight="400.0" prefWidth="600.0" styleClass="myTab" stylesheets="@../stylesheets/main.css" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="resources.mainController">
   <tabs>
-    <Tab fx:id="myCreations" styleClass="tabBg" text="My creations">
-      <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="400.0" styleClass="anchorBg">
-               <children>
-                  <StackPane layoutX="520.0" layoutY="54.0" prefHeight="400.0" prefWidth="600.0" styleClass="mediaHolder">
-                     <children>
-                        <MediaView fx:id="myCreationsPlayer" fitHeight="375.0" fitWidth="575.0" styleClass="mediaPlayers" />
-                     </children>
-                  </StackPane>
-                  <HBox alignment="CENTER" layoutX="73.0" layoutY="494.0" prefHeight="50.0" prefWidth="360.0" spacing="50.0">
-                     <children>
-                        <Button fx:id="creationsPlayBtn" minHeight="35.0" mnemonicParsing="false" onAction="#creationsPlayBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Play" />
-                        <Button fx:id="creationsDeleteBtn" minHeight="35.0" mnemonicParsing="false" onAction="#creationsDeleteBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Delete" />
-                     </children>
-                  </HBox>
-                  <HBox alignment="CENTER" layoutX="580.0" layoutY="494.0" prefHeight="50.0" prefWidth="480.0" spacing="50.0">
-                     <children>
-                        <Button fx:id="creationsMediaPlayBtn" minHeight="35.0" mnemonicParsing="false" onAction="#creationsMediaPlayBtnPressed" prefWidth="100.0" styleClass="defaultBtn">
-                           <graphic>
-                              <ImageView fitHeight="15.0" fitWidth="75.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/playicon.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                        <Button fx:id="creationsMediaPauseBtn" layoutX="200.0" layoutY="18.0" minHeight="35.0" mnemonicParsing="false" onAction="#creationsMediaPauseBtnPressed" prefWidth="100.0" styleClass="defaultBtn">
-                           <graphic>
-                              <ImageView fitHeight="25.0" fitWidth="75.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/pauseicon.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                        <Button fx:id="creationsMediaStopBtn" minHeight="35.0" mnemonicParsing="false" onAction="#creationsMediaStopBtnPressed" prefWidth="100.0" styleClass="defaultBtn">
-                           <graphic>
-                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/stop.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                     </children>
-                  </HBox>
-                  <ListView fx:id="existingCreationsList" layoutX="53.0" layoutY="54.0" prefHeight="400.0" prefWidth="400.0" />
-                  <Button fx:id="myCreationsHelpBtn" layoutX="14.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#myCreationsHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
-                  <Label fx:id="addTextLabel1" alignment="CENTER" layoutX="53.0" layoutY="583.0" prefHeight="100.0" prefWidth="400.0" styleClass="txtLabels" text="Please highlight a video by clicking on a creation in the list then choose to either 'Play' or 'Delete' the creation" textAlignment="CENTER" wrapText="true" />
-                  <Label fx:id="addTextLabel11" alignment="CENTER" layoutX="520.0" layoutY="583.0" prefHeight="100.0" prefWidth="600.0" styleClass="txtLabels" text="'Play' button to play/resume, 'Pause' button to pause, and 'Stop' to stop the video" textAlignment="CENTER" wrapText="true" />
-                  <Label alignment="CENTER" layoutX="520.0" layoutY="743.0" prefHeight="100.0" prefWidth="600.0" styleClass="currentSearchTermLabel" text="Don't forget to go to the review section to review your creations to improve your memory of your search terms!" textAlignment="CENTER" wrapText="true" />
-               </children></AnchorPane>
-      </content>
-    </Tab>
     <Tab styleClass="tabBg" text="Create">
       <content>
         <AnchorPane minHeight="0.0" minWidth="0.0" styleClass="anchorBg">
@@ -141,7 +87,7 @@
                               <Label fx:id="searchingLabel1" layoutX="448.0" layoutY="659.0" styleClass="defaultText" text="Please enter a name for your creation" />
                               <ProgressBar fx:id="flickrProgress" layoutX="683.0" layoutY="47.0" prefHeight="50.0" prefWidth="466.0" progress="0.0" />
                               <Button fx:id="flickrBackBtn" layoutX="139.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#flickrBackBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Go back" />
-                              <Button fx:id="flickrHelpBtn" layoutX="19.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#flickrHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
+                              <Button fx:id="flickrHelpBtn" layoutX="19.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#flickrHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Click Me" />
                            </children>
                         </AnchorPane>
                         <AnchorPane fx:id="searchTextPane" prefWidth="1200.0" styleClass="anchorBg">
@@ -168,7 +114,7 @@
                               <Button fx:id="nextSearchBtn" layoutX="1083.0" layoutY="807.0" minHeight="35.0" mnemonicParsing="false" onAction="#searchNextBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Next" />
                               <Button fx:id="previewSelectedBtn" layoutX="792.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#previewSelectedBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Preview" />
                               <Label fx:id="searchPaneLabel" alignment="CENTER" layoutX="367.0" layoutY="22.0" prefHeight="55.0" prefWidth="466.0" styleClass="currentSearchTermLabel" text="Please search for a term for your creation" wrapText="true" />
-                              <Button fx:id="searchHelpBtn" layoutX="14.0" layoutY="807.0" minHeight="35.0" mnemonicParsing="false" onAction="#searchHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
+                              <Button fx:id="searchHelpBtn" layoutX="14.0" layoutY="807.0" minHeight="35.0" mnemonicParsing="false" onAction="#searchHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Click Me" />
                            </children>
                         </AnchorPane>
                         <AnchorPane fx:id="createAudioPane" prefHeight="857.0" prefWidth="1200.0" styleClass="anchorBg">
@@ -213,7 +159,7 @@
                               <Button fx:id="nextAudioBtn" layoutX="829.0" layoutY="793.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioNextBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Next" />
                               <TextArea fx:id="audioDisplayText" editable="false" layoutX="19.0" layoutY="157.0" prefHeight="250.0" prefWidth="450.0" styleClass="textAreas" wrapText="true" />
                               <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="97.0" prefHeight="38.0" prefWidth="450.0" styleClass="txtLabels" text="Your selected text is displayed below..." textAlignment="CENTER" wrapText="true" />
-                              <Button fx:id="audioHelpBtn" layoutX="19.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
+                              <Button fx:id="audioHelpBtn" layoutX="19.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Click me" />
                               <Button fx:id="audioBackBtn" layoutX="138.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioBackBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Go back" />
                            </children>
                         </AnchorPane>
@@ -226,7 +172,7 @@
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchorBg">
                <children>
-                  <TableView fx:id="_tableViewForReview" editable="true" layoutX="150.0" layoutY="550.0" prefHeight="225.0" prefWidth="900.0" styleClass="reviewTable">
+                  <TableView fx:id="tableViewForReview" editable="true" layoutX="150.0" layoutY="550.0" prefHeight="235.0" prefWidth="900.0" styleClass="reviewTable">
                      <columns>
                         <TableColumn fx:id="_tableFileName" prefWidth="125.0" text="Creation Name" />
                         <TableColumn fx:id="_tableKeyword" prefWidth="113.0" text="Keyword" />
@@ -237,14 +183,14 @@
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
                   </TableView>
-                  <StackPane layoutX="150.0" layoutY="14.0" prefHeight="450.0" prefWidth="900.0" styleClass="mediaHolder">
+                  <StackPane fx:id="mediaHolder" layoutX="150.0" layoutY="14.0" prefHeight="450.0" prefWidth="900.0" styleClass="mediaHolder">
                      <children>
-                        <MediaView fx:id="myCreationsPlayer1" fitHeight="440.0" fitWidth="720.0" styleClass="mediaPlayers" />
+                        <MediaView fx:id="reviewMediaView" fitHeight="440.0" fitWidth="720.0" styleClass="mediaPlayers" />
                      </children>
                   </StackPane>
                   <HBox alignment="CENTER" layoutX="360.0" layoutY="485.0" prefHeight="50.0" prefWidth="480.0" spacing="50.0">
                      <children>
-                        <Button minHeight="35.0" mnemonicParsing="false" prefWidth="100.0" styleClass="defaultBtn">
+                        <Button fx:id="reviewPlayBtn" minHeight="35.0" mnemonicParsing="false" onAction="#reviewPlayBtnPressed" prefWidth="100.0" styleClass="defaultBtn">
                            <graphic>
                               <ImageView fitHeight="15.0" fitWidth="75.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -253,7 +199,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <Button layoutX="200.0" layoutY="18.0" minHeight="35.0" mnemonicParsing="false" prefWidth="100.0" styleClass="defaultBtn">
+                        <Button fx:id="reviewPauseBtn" layoutX="200.0" layoutY="18.0" minHeight="35.0" mnemonicParsing="false" onAction="#reviewPauseBtnPressed" prefWidth="100.0" styleClass="defaultBtn">
                            <graphic>
                               <ImageView fitHeight="25.0" fitWidth="75.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -262,7 +208,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <Button minHeight="35.0" mnemonicParsing="false" prefWidth="100.0" styleClass="defaultBtn">
+                        <Button fx:id="reviewStopBtn" minHeight="35.0" mnemonicParsing="false" onAction="#reviewStopBtnPressed" prefWidth="100.0" styleClass="defaultBtn">
                            <graphic>
                               <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -273,12 +219,17 @@
                         </Button>
                      </children>
                   </HBox>
-                  <Button layoutX="363.0" layoutY="796.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="475.0" styleClass="defaultBtn" text="Play">
+                  <Button fx:id="reviewStartPlayBtn" layoutX="150.0" layoutY="805.0" mnemonicParsing="false" onAction="#reviewStartPlayBtnPressed" prefHeight="38.0" prefWidth="440.0" styleClass="defaultBtn" text="Play">
                      <font>
                         <Font size="18.0" />
                      </font>
                   </Button>
-                  <Button fx:id="reviewHelpBtn" layoutX="14.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#reviewHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="?" />
+                  <Button fx:id="reviewHelpBtn" layoutX="14.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#reviewHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Click Me" />
+                  <Button fx:id="reviewDeleteBtn" layoutX="610.0" layoutY="805.0" mnemonicParsing="false" onAction="#reviewDeleteBtnPressed" prefHeight="38.0" prefWidth="440.0" styleClass="defaultBtn" text="Delete">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Button>
                </children></AnchorPane>
          </content>
       </Tab>
