@@ -13,7 +13,7 @@
             <Image url="@../images/varpedialogo.png" />
          </image></ImageView>
       <Button id="introBtn" fx:id="introBtn" layoutX="400.0" layoutY="769.0" minHeight="75.0" minWidth="400.0" mnemonicParsing="false" onAction="#beginClicked" text="Click to begin" textFill="WHITE" />
-      <Label id="introDescription" alignment="CENTER" layoutX="195.0" layoutY="682.0" minHeight="64.0" minWidth="512.0" prefHeight="64.0" prefWidth="810.0" stylesheets="@../stylesheets/caspian.css" text="Visual Aural Reading Encyclopedia" textAlignment="CENTER" />
-      <Label id="introTitle" alignment="CENTER" layoutX="344.0" layoutY="542.0" minHeight="64.0" minWidth="512.0" stylesheets="@../stylesheets/caspian.css" text="VARpedia" />
+      <Label id="introDescription" alignment="CENTER" layoutX="195.0" layoutY="682.0" minHeight="64.0" minWidth="512.0" prefHeight="64.0" prefWidth="810.0" text="Visual Aural Reading Encyclopedia" textAlignment="CENTER" />
+      <Label id="introTitle" alignment="CENTER" layoutX="344.0" layoutY="542.0" minHeight="64.0" minWidth="512.0" text="VARpedia" />
    </children>
 </AnchorPane>
