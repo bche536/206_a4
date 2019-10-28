@@ -1,10 +1,10 @@
-@font-face {
+/*@font-face {
     src: url("/fonts/Raleway-Bold.ttf");
 }
 
 * {
     -fx-font-family: "Raleway", sans-serif;
-}
+}*/
 
 
 
@@ -210,6 +210,11 @@ table-view .column-header-background,
 .audioChoiceBox {
     -fx-background-radius: none;
     -fx-background-color: white;
+}
+
+.selectedFile {
+    -fx-font-size: 24px;
+    -fx-text-fill: #2971d6;
 }
 
 /* --------------- Gridpane for holding images */

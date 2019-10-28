@@ -36,6 +36,8 @@ public class mainController implements Initializable, Serializable {
 
     //---------------------------------- General fields --------------------------------------------
     private boolean _selectedPressed;
+    private WikiSearch _searchWikiTask;
+    private FlickrClass _flickrTask;
 
 
     /**************************** START OF CREATION TAB COMPONENTS **********************************/
@@ -43,15 +45,14 @@ public class mainController implements Initializable, Serializable {
     /* ========================== START OF SEARCH PANE COMPONENTS ================================= */
 
     @FXML private AnchorPane searchTextPane;
-    @FXML private Button searchHelpBtn;
     @FXML private TextField searchField;
     @FXML private Label searchingLabel;
     @FXML private Button searchBtn;
+    @FXML private Button searchCancelBtn;
     @FXML private TextArea searchTextArea;
     @FXML private ProgressBar searchProgress;
     @FXML private TextArea selectedTextArea;
     @FXML private Button addTextBtn;
-    @FXML private Button nextSearchBtn;
 
     /* ========================== END OF SEARCH PANE COMPONENTS ================================= */
 
@@ -149,6 +150,7 @@ public class mainController implements Initializable, Serializable {
 
         searchTextPane.toFront();
         _searchTerm = "";
+        searchCancelBtn.setVisible(false);
         searchingLabel.setVisible(false);
         searchProgress.setVisible(false);
         searchTextArea.setEditable(false);
@@ -235,77 +237,48 @@ public class mainController implements Initializable, Serializable {
             _alert.showAndWait();
 
         } else {
-            WikiSearch searchWikiTask = new WikiSearch(_searchTerm);
+            _searchWikiTask = new WikiSearch(_searchTerm);
 
-            // While the task is running
-            searchWikiTask.setOnRunning((succeesesEvent) -> {
-                searchProgress.setVisible(true);
-                searchingLabel.setText("Searching please wait...");
-                // disable the button for creation
-                searchBtn.setDisable(true);
-                searchingLabel.setVisible(true);
+            _searchWikiTask.setOnRunning((succeesesEvent) -> {
+                setUpSearchWikiOnRunning();
             });
 
-            searchProgress.progressProperty().bind(searchWikiTask.progressProperty());
+            _searchWikiTask.setOnCancelled((taskCancelled) ->{
+                setUpSearchWikiOnCancelled();
+            });
+
+            searchProgress.progressProperty().bind(_searchWikiTask.progressProperty());
 
             // When the thread finished its task
-            searchWikiTask.setOnSucceeded((succeededEvent) -> {
+            _searchWikiTask.setOnSucceeded((succeededEvent) -> {
                 try {
-                    searchProgress.setVisible(false);
-                    searchingLabel.setText("Search is complete");
-                    searchBtn.setDisable(false);
+                    setUpSearchWikiOnSuccess();
+                    String searchWikiLine = getSearchResultProcess();
+                    String invalidResult = _searchTerm + " not found :^(";
 
-                    String cmd = "cat " + _path + "/" + "textFromWiki.txt";
-                    ProcessBuilder searchWikiPb = new ProcessBuilder("bash", "-c", cmd);
-                    Process searchWikiProcess = searchWikiPb.start();
-                    InputStream searchWikiStdout = searchWikiProcess.getInputStream();
-                    BufferedReader searchWikiStdoutBuffered = new BufferedReader(new InputStreamReader(searchWikiStdout));
-                    String searchWikiLine = searchWikiStdoutBuffered.readLine();
-                    String temp = _searchTerm + " not found :^(";
-
-                    searchWikiProcess.waitFor();
-                    searchWikiProcess.destroy();
-
-                    searchProgress.progressProperty().unbind();
-                    searchProgress.setProgress(0);
-
-                    if (searchWikiLine.equals(temp)) {
+                    if (searchWikiLine.equals(invalidResult)) {
                         // Invalid input, display an alert
                         _alert = _alertGenerator.newAlert("Invalid Input", "Invalid Term", "No results available, please enter a valid input", "error");
                         _alert.showAndWait();
 
                     } else {
-                        try {
-                            String getTextCmd = "cat " + _path + "/" + "textFromWiki.txt";
-                            ProcessBuilder getTextPb = new ProcessBuilder("bash", "-c", getTextCmd);
-                            Process getTextProcess = getTextPb.start();
-                            InputStream getTextStdout = getTextProcess.getInputStream();
-                            BufferedReader getTextStdoutBuffered = new BufferedReader(new InputStreamReader(getTextStdout));
-                            String getTextLine = null;
-                            _searchText = "";
-                            while ((getTextLine = getTextStdoutBuffered.readLine()) != null) {
-                                _searchText = _searchText + getTextLine + "\n";
-                            }
-                            getTextProcess.waitFor();
-                            getTextProcess.destroy();
-                        } catch (IOException getTextException) {
-                            getTextException.printStackTrace();
-                        }
-                        searchTextArea.setText(_searchText);
-                        _searchText = "";
+                        setUpSearchResult();
                     }
-                } catch (Exception searchWikiException) {
-                    searchWikiException.printStackTrace();
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
+                } catch (Throwable e) {
+                    e.printStackTrace();
                 }
 
             });
 
             ExecutorService searchService = Executors.newFixedThreadPool(1);
-            searchService.execute(searchWikiTask);
+            searchService.execute(_searchWikiTask);
             searchService.shutdown();
         }
+    }
+
+
+    @FXML void searchCancelBtnPressed(ActionEvent event) {
+        _searchWikiTask.cancel();
     }
 
     //--------------------------------- addTextBtn Logic --------------------------------------
@@ -318,7 +291,7 @@ public class mainController implements Initializable, Serializable {
     //--------------------------------- previewSelectedBtn Logic --------------------------------------
 
     @FXML void previewSelectedBtnPressed(ActionEvent event) throws Throwable {
-        // play the selected text
+        // Play the selected text
         String str = selectedTextArea.getText();
         int words = getWordCounts(str);
 
@@ -332,6 +305,7 @@ public class mainController implements Initializable, Serializable {
         } else {
             String content = selectedTextArea.getText().replaceAll("[\\[\\](){}']", "");
             try {
+                //TTS the selected audio
                 String previewCmd = "echo " + content + " | festival --tts";
                 ProcessBuilder previewPb = new ProcessBuilder("bash", "-c", previewCmd);
                 Process previewProcess = previewPb.start();
@@ -343,7 +317,7 @@ public class mainController implements Initializable, Serializable {
     }
 
 
-    //--------------------------------- clearSelectionBtn Logic --------------------------------
+    //--------------------------------- clearSelectionBtn Logic -------------------------------
 
     @FXML void clearSelectionBtnPressed(ActionEvent event) {
         selectedTextArea.clear();
@@ -365,9 +339,11 @@ public class mainController implements Initializable, Serializable {
     //--------------------------------- searchHelpBtn Logic -----------------------------------------
 
     @FXML void searchHelpBtnPressed(ActionEvent event) throws Throwable {
-        _alert = _alertGenerator.newAlert("", "", "1. Enter a search term in the search box then press " +
-                "'Enter' or click on the 'Magnifying Glass' button to search\n\n2. Highlight the text from the left text box that you want " +
-                "in your creation by dragging your mouse over the text you want\n\n3. Click the 'Add' button to add your text to the right textbox\n\n" +
+        _alert = _alertGenerator.newAlert("", "", "" +
+                "1. Enter a search term in the search box then press 'Enter' or click on the 'Magnifying Glass' button to search\n\n" +
+                "2. If your search is taking too long because no results are appearing, press the 'Cance;' button to try again\n\n" +
+                "2. Highlight the text from the left text box that you want in your creation by dragging your mouse over the text you want\n\n" +
+                "3. Click the 'Add' button to add your text to the right textbox\n\n" +
                 "4. Press the 'Preview' or 'Clear' button to either: Preview the audio or Clear your selection\n\n" +
                 "5. Press the 'Next' button to move onto the audio section when you are happy with your text", "information");
         _alert.show();
@@ -414,16 +390,10 @@ public class mainController implements Initializable, Serializable {
                             // The audio file they created has some unpronounceable words for this synthesiser
                             _alert = _alertGenerator.newAlert("Error", "Unreadable words", "Text contains unreadable words, please change to the default voice or edit the text", "error");
                             _alert.showAndWait();
-
-                            String cmd1 = "rm " + _path + "/" + audioName + ".wav";
-                            ProcessBuilder pb1 = new ProcessBuilder("bash", "-c", cmd1);
-                            Process process1 = pb1.start();
-                            process1.waitFor();
-                            process1.destroy();
-
+                            //Remove the audio file created
+                            genericProcess("rm " + _path + "/" + audioName + ".wav");
                         } else {
-
-                            // show confirmation
+                            // Show confirmation
                             audioTask.setOnSucceeded((onCompletion) ->{
                                 executorService.shutdown();
                                 // Alert the user that the audio file has been successfully created
@@ -484,7 +454,8 @@ public class mainController implements Initializable, Serializable {
     //--------------------------------- audioHelpBtnPressed Logic --------------------------------------
 
     @FXML void audioHelpBtnPressed(ActionEvent event) throws Throwable {
-        _alert = _alertGenerator.newAlert("", "", "1. Your selected will be displayed in the left textbox\n\n" +
+        _alert = _alertGenerator.newAlert("", "", "" +
+                "1. Your selected will be displayed in the left textbox\n\n" +
                 "2. Below the textbox are two dropdown boxes where you can select your speech voice and background music\n\n" +
                 "3. Once you are happy with your options, click the 'Create' button and wait for your audio file to be created\n\n" +
                 "4. Select your audio file by clicking on the list then press the 'Preview' or 'Delete' button below the audio list to either: Preview the audio or Delete your selection\n\n" +
@@ -520,13 +491,7 @@ public class mainController implements Initializable, Serializable {
 
                     // combine wav files
                     try {
-                        String soxCmd = "sox " + audioFileNames + _path + "/" + audioName + ".wav";
-
-                        ProcessBuilder pb = new ProcessBuilder("bash", "-c", soxCmd);
-                        Process process = pb.start();
-                        process.waitFor();
-                        process.destroy();
-
+                        genericProcess("sox " + audioFileNames + _path + "/" + audioName + ".wav");
                     } catch (IOException invalidSoxCmdException) {
                         invalidSoxCmdException.printStackTrace();
                     }
@@ -582,7 +547,7 @@ public class mainController implements Initializable, Serializable {
             //getSelectedAudioCreationsCount() method updates the _audioFileName field which is the location of the audioFile to be used
             String splitName[] = _audioFileName.split("/");
             String displayFileName = splitName[splitName.length - 1];
-            selectedAudioLabel.setText("You have selected the audio file: " + displayFileName);
+            selectedAudioLabel.setText(displayFileName);
             _selectedPressed = true;
         }
     }
@@ -616,30 +581,17 @@ public class mainController implements Initializable, Serializable {
             finishFlickrBtn.setDisable(true);
             flickrPane.toFront();
             //When input is valid, make a new task and submit to ExecutorServices and wait
-            FlickrClass flickrTask = new FlickrClass(_searchTerm, _path);
+            _flickrTask = new FlickrClass(_searchTerm, _path);
             _flickrService = Executors.newSingleThreadExecutor();
-            _flickrService.submit(flickrTask);
+            _flickrService.submit(_flickrTask);
 
-            flickrTask.setOnRunning((whileRunning) ->{
-                for(int i = 0; i < images.length; i++){
-                    images[i].setVisible(false);
-                }
-                flickrSceneLabel.setText("Searching for images, please wait...");
-                flickrProgress.progressProperty().bind(flickrTask.progressProperty());
+            _flickrTask.setOnRunning((whileRunning) ->{
+                setUpFlickrOnRunning();
             });
 
             //When the thread finished its task prompt the user for a name for the file
-            flickrTask.setOnSucceeded((succeededEvent) -> {
-                _flickrService.shutdown();
-                for(int i = 0; i < images.length; i++){
-                    images[i].setVisible(true);
-                }
-                flickrSceneLabel.setText("Please click on the images that you would like in your creation");
-                flickrProgress.progressProperty().unbind();
-                flickrProgress.setVisible(false);
-                finishFlickrBtn.setDisable(false);
-                searchingLabel.setText("");
-                updateImages();
+            _flickrTask.setOnSucceeded((succeededEvent) -> {
+                setUpFlickrOnSuccess();
             });
         }
         else {
@@ -692,16 +644,11 @@ public class mainController implements Initializable, Serializable {
                 });
 
                 videoTask.setOnCancelled((onCancel) -> {
-                    String cancelCmd = "rm -r " + _path + "/temp/";
-                    ProcessBuilder cancelBuilder = new ProcessBuilder("bash", "-c", cancelCmd);
                     try {
-                        Process cancelProcess = cancelBuilder.start();
-                        cancelProcess.waitFor();
-                        cancelProcess.destroy();
-                    } catch (IOException | InterruptedException e) {
+                        genericProcess("rm -r " + _path + "/temp/");
+                    } catch (InterruptedException | IOException e) {
                         e.printStackTrace();
                     }
-
                     flickrProgress.setVisible(false);
                     flickrProgress.progressProperty().unbind();
                     flickrSceneLabel.setText("Video creation interrupted, please try again");
@@ -742,16 +689,12 @@ public class mainController implements Initializable, Serializable {
 
     @FXML void flickrBackBtnPressed(ActionEvent event) throws IOException, InterruptedException {
         createAudioPane.toFront();
-        String cmd = "rm -r " + _path + "/temp/";
-        ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
-        Process process = pb.start();
-        process.waitFor();
-        process.destroy();
-
+        genericProcess("rm -r " + _path + "/temp/");
     }
 
     @FXML void flickrHelpBtnPressed(ActionEvent event) throws Throwable {
-        _alert = _alertGenerator.newAlert("", "", "1. Click on the images that you want\n\n" +
+        _alert = _alertGenerator.newAlert("", "", "" +
+                "1. Click on the images that you want\n\n" +
                 "2. Selected images will be highlighted/have a blue border around them\n\n" +
                 "3. Please choose at least one image\n\n" +
                 "4. Once you are happy with your images, enter a creation name in the textfield below\n\n" +
@@ -811,12 +754,8 @@ public class mainController implements Initializable, Serializable {
     }
 
     @FXML void reviewDeleteBtnPressed(ActionEvent event) {
-        System.out.println("hello PRESSED");
         Creation selection = tableViewForReview.getSelectionModel().getSelectedItem();
         String videoName = selection.getName();
-        System.out.println(selection);
-        System.out.println(videoName);
-
         try {
             if(selection == null){
                 System.out.println("hello");
@@ -827,12 +766,7 @@ public class mainController implements Initializable, Serializable {
             alert.showAndWait();
 
             if (alert.getResult() == ButtonType.YES) {
-                String cmd = "rm " + _path + "/" + videoName + ".mp4 " + _path + "/creations.txt;touch " + _path + "/creations.txt";
-                System.out.println(cmd);
-                ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
-                Process process = builder.start();
-                process.waitFor();
-                process.destroy();
+                genericProcess("rm " + _path + "/" + videoName + ".mp4 " + _path + "/creations.txt;touch " + _path + "/creations.txt");
                 _existingCreations.remove(selection);
 
                 saveCreations(_existingCreations);
@@ -845,12 +779,14 @@ public class mainController implements Initializable, Serializable {
     }
 
     @FXML public void reviewHelpBtnPressed() throws Throwable {
-        _alert = _alertGenerator.newAlert("Active Learning Component", "", "1. Choose a creation that you want to play by clicking on the list\n\n" +
+        _alert = _alertGenerator.newAlert("Active Learning Component", "", "" +
+                "1. Choose a creation that you want to play by clicking on the list\n\n" +
                 "2. Press the big 'Play' button on the button to load the video\n\n" +
                 "3. Under the video you will see three buttons 'Play, 'Pause' and 'Stop'\n\n" +
                 "4. You can edit your level of confidence by clicking on 'Confidence Level' column (only from the range 1-5)\n\n" +
                 "5. THe 'Number of plays' will only increase if you watch the whole video\n\n" +
-                "6. We encourage you to create more videos if you have a lot of 4's and 5's in your 'Confidence Levels'", "information");
+                "6. You can click the headers of each column to sort your creations in order\n\n" +
+                "7. We encourage you to create more videos if you have a lot of 4's and 5's in your 'Confidence Levels'", "information");
         _alert.show();
     }
 
@@ -1161,6 +1097,91 @@ public class mainController implements Initializable, Serializable {
         Process genericProcess = genericPb.start();
         genericProcess.waitFor();
         genericProcess.destroy();;
+    }
+
+    public void setUpSearchWikiOnRunning(){
+        searchCancelBtn.setVisible(true);
+        searchProgress.setVisible(true);
+        searchingLabel.setText("Searching please wait...");
+        // disable the button for creation
+        searchBtn.setDisable(true);
+        searchingLabel.setVisible(true);
+    }
+
+    public void setUpSearchWikiOnCancelled(){
+        searchField.clear();
+        _searchTerm = "";
+        searchCancelBtn.setVisible(false);
+        searchProgress.setVisible(false);
+        searchingLabel.setText("Search interrupted, please try again");
+        searchBtn.setDisable(false);
+        searchProgress.progressProperty().unbind();
+        searchProgress.setProgress(0);
+    }
+
+    public void setUpSearchWikiOnSuccess(){
+        searchCancelBtn.setVisible(false);
+        searchProgress.setVisible(false);
+        searchingLabel.setText("Search is complete");
+        searchBtn.setDisable(false);
+        searchProgress.progressProperty().unbind();
+        searchProgress.setProgress(0);
+    }
+
+    public String getSearchResultProcess() throws IOException, InterruptedException {
+        String cmd = "cat " + _path + "/" + "textFromWiki.txt";
+        ProcessBuilder searchWikiPb = new ProcessBuilder("bash", "-c", cmd);
+        Process searchWikiProcess = searchWikiPb.start();
+        InputStream searchWikiStdout = searchWikiProcess.getInputStream();
+        BufferedReader searchWikiStdoutBuffered = new BufferedReader(new InputStreamReader(searchWikiStdout));
+        String searchWikiLine = searchWikiStdoutBuffered.readLine();
+        searchWikiProcess.waitFor();
+        searchWikiProcess.destroy();
+
+        return searchWikiLine;
+    }
+
+    public void setUpSearchResult(){
+        try {
+            String getTextCmd = "cat " + _path + "/" + "textFromWiki.txt";
+            ProcessBuilder getTextPb = new ProcessBuilder("bash", "-c", getTextCmd);
+            Process getTextProcess = getTextPb.start();
+            InputStream getTextStdout = getTextProcess.getInputStream();
+            BufferedReader getTextStdoutBuffered = new BufferedReader(new InputStreamReader(getTextStdout));
+            String getTextLine = null;
+            _searchText = "";
+            while ((getTextLine = getTextStdoutBuffered.readLine()) != null) {
+                _searchText = _searchText + getTextLine + "\n";
+            }
+            getTextProcess.waitFor();
+            getTextProcess.destroy();
+        } catch (IOException | InterruptedException getTextException) {
+            getTextException.printStackTrace();
+        }
+        searchTextArea.setText(_searchText);
+        _searchText = "";
+    }
+
+    public void setUpFlickrOnRunning(){
+        for(int i = 0; i < images.length; i++){
+            images[i].setVisible(false);
+        }
+        flickrSceneLabel.setText("Searching for images, please wait...");
+        flickrProgress.progressProperty().bind(_flickrTask.progressProperty());
+
+    }
+
+    public void setUpFlickrOnSuccess(){
+        _flickrService.shutdown();
+        for(int i = 0; i < images.length; i++){
+            images[i].setVisible(true);
+        }
+        flickrSceneLabel.setText("Please click on the images that you would like in your creation");
+        flickrProgress.progressProperty().unbind();
+        flickrProgress.setVisible(false);
+        finishFlickrBtn.setDisable(false);
+        searchingLabel.setText("");
+        updateImages();
     }
 
 

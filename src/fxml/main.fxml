@@ -103,8 +103,8 @@
                               </Button>
                               <TextField fx:id="searchField" layoutX="367.0" layoutY="93.0" prefHeight="50.0" prefWidth="400.0" promptText="Enter text here" styleClass="searchField" />
                               <TextArea fx:id="searchTextArea" layoutX="19.0" layoutY="281.0" prefHeight="350.0" prefWidth="475.0" promptText="Results from search text here..." styleClass="textAreas" wrapText="true" />
-                              <ProgressBar fx:id="searchProgress" layoutX="367.0" layoutY="187.0" prefHeight="50.0" prefWidth="466.0" progress="0.0" />
-                              <Label fx:id="searchingLabel" layoutX="508.0" layoutY="156.0" styleClass="defaultText" text="Seaching please wait..." />
+                              <ProgressBar fx:id="searchProgress" layoutX="367.0" layoutY="187.0" prefHeight="35.0" prefWidth="466.0" progress="0.0" />
+                              <Label fx:id="searchingLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="367.0" layoutY="157.0" prefWidth="466.0" styleClass="defaultText" text="Searching please wait..." textAlignment="CENTER" />
                               <TextArea fx:id="selectedTextArea" layoutX="708.0" layoutY="281.0" prefHeight="215.0" prefWidth="475.0" promptText="The text you want in your creation here..." styleClass="textAreas" wrapText="true" />
                               <Label fx:id="addTextLabel" alignment="CENTER" layoutX="15.0" layoutY="669.0" prefHeight="100.0" prefWidth="475.0" styleClass="txtLabels" text="Please highlight the words in the text above that you want to add to your creation then press 'Add' (10 - 40 words)" textAlignment="CENTER" wrapText="true" />
                               <Button fx:id="addTextBtn" layoutX="550.0" layoutY="441.0" minHeight="35.0" mnemonicParsing="false" onAction="#addBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Add" />
@@ -115,6 +115,7 @@
                               <Button fx:id="previewSelectedBtn" layoutX="792.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#previewSelectedBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Preview" />
                               <Label fx:id="searchPaneLabel" alignment="CENTER" layoutX="367.0" layoutY="22.0" prefHeight="55.0" prefWidth="466.0" styleClass="currentSearchTermLabel" text="Please search for a term for your creation" wrapText="true" />
                               <Button fx:id="searchHelpBtn" layoutX="14.0" layoutY="807.0" minHeight="35.0" mnemonicParsing="false" onAction="#searchHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Click Me" />
+                              <Button fx:id="searchCancelBtn" layoutX="367.0" layoutY="233.0" minHeight="35.0" mnemonicParsing="false" onAction="#searchCancelBtnPressed" prefWidth="466.0" styleClass="defaultBtn" text="Cancel" />
                            </children>
                         </AnchorPane>
                         <AnchorPane fx:id="createAudioPane" prefHeight="857.0" prefWidth="1200.0" styleClass="anchorBg">
@@ -155,12 +156,13 @@
                               <Label alignment="CENTER" layoutX="579.0" layoutY="572.0" prefHeight="150.0" prefWidth="600.0" styleClass="txtLabels" text="Hold CTRL and click to highlight the audio files you want to combine, then combine by pressing the 'Combine' button. If you are satisfied with your audio, please click to highlight it then press 'Select' to set your creation audio. Once you are ready to move onto selecting images for your creation, please press 'Next'." textAlignment="CENTER" wrapText="true" />
                               <Button fx:id="selectAudioBtn" layoutX="912.0" layoutY="508.0" minHeight="35.0" mnemonicParsing="false" onAction="#selectAudioBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Select" />
                               <Label alignment="CENTER" layoutX="577.0" layoutY="22.0" prefHeight="55.0" prefWidth="600.0" styleClass="currentSearchTermLabel" text="Your audio files" wrapText="true" />
-                              <Label fx:id="selectedAudioLabel" alignment="TOP_LEFT" layoutX="579.0" layoutY="743.0" prefHeight="100.0" prefWidth="600.0" styleClass="txtLabels" text="You have selected the audio file:" textAlignment="CENTER" wrapText="true" />
+                              <Label alignment="TOP_LEFT" layoutX="579.0" layoutY="743.0" prefHeight="100.0" prefWidth="600.0" styleClass="txtLabels" text="You have selected the audio file:" textAlignment="CENTER" wrapText="true" />
                               <Button fx:id="nextAudioBtn" layoutX="829.0" layoutY="793.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioNextBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Next" />
                               <TextArea fx:id="audioDisplayText" editable="false" layoutX="19.0" layoutY="157.0" prefHeight="250.0" prefWidth="450.0" styleClass="textAreas" wrapText="true" />
                               <Label alignment="TOP_CENTER" layoutX="19.0" layoutY="97.0" prefHeight="38.0" prefWidth="450.0" styleClass="txtLabels" text="Your selected text is displayed below..." textAlignment="CENTER" wrapText="true" />
                               <Button fx:id="audioHelpBtn" layoutX="19.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioHelpBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Click me" />
                               <Button fx:id="audioBackBtn" layoutX="138.0" layoutY="808.0" minHeight="35.0" mnemonicParsing="false" onAction="#audioBackBtnPressed" prefWidth="100.0" styleClass="defaultBtn" text="Go back" />
+                              <Label fx:id="selectedAudioLabel" layoutX="862.0" layoutY="748.0" prefHeight="30.0" prefWidth="300.0" styleClass="selectedFile" />
                            </children>
                         </AnchorPane>
                      </children>
