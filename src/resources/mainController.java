@@ -47,12 +47,9 @@ public class mainController implements Initializable, Serializable {
     @FXML private AnchorPane searchTextPane;
     @FXML private TextField searchField;
     @FXML private Label searchingLabel;
-    @FXML private Button searchBtn;
-    @FXML private Button searchCancelBtn;
-    @FXML private TextArea searchTextArea;
+    @FXML private Button searchBtn, searchCancelBtn, addTextBtn;
+    @FXML private TextArea searchTextArea, selectedTextArea;
     @FXML private ProgressBar searchProgress;
-    @FXML private TextArea selectedTextArea;
-    @FXML private Button addTextBtn;
 
     /* ========================== END OF SEARCH PANE COMPONENTS ================================= */
 
@@ -60,8 +57,7 @@ public class mainController implements Initializable, Serializable {
 
     @FXML private AnchorPane createAudioPane;
     @FXML private TextArea audioDisplayText;
-    @FXML private ChoiceBox<String> audioChoiceBox;
-    @FXML private ChoiceBox<String> backgroundChoiceBox;
+    @FXML private ChoiceBox<String> audioChoiceBox, backgroundChoiceBox;
     @FXML private ListView<String> audioCreationsList;
     @FXML public static MediaPlayer previewPlayer;
     @FXML private Label selectedAudioLabel;
@@ -73,29 +69,13 @@ public class mainController implements Initializable, Serializable {
     @FXML private AnchorPane flickrPane;
     @FXML private Label flickrSceneLabel;
     @FXML private ProgressBar flickrProgress;
-    @FXML private ToggleButton imageBtn1;
-    @FXML private ImageView image1;
-    @FXML private ToggleButton imageBtn2;
-    @FXML private ImageView image2;
-    @FXML private ToggleButton imageBtn3;
-    @FXML private ImageView image3;
-    @FXML private ToggleButton imageBtn4;
-    @FXML private ImageView image4;
-    @FXML private ToggleButton imageBtn5;
-    @FXML private ImageView image5;
-    @FXML private ToggleButton imageBtn6;
-    @FXML private ImageView image6;
-    @FXML private ToggleButton imageBtn7;
-    @FXML private ImageView image7;
-    @FXML private ToggleButton imageBtn8;
-    @FXML private ImageView image8;
-    @FXML private ToggleButton imageBtn9;
-    @FXML private ImageView image9;
-    @FXML private ToggleButton imageBtn10;
-    @FXML private ImageView image10;
+    @FXML private ToggleButton imageBtn1, imageBtn2, imageBtn3, imageBtn4, imageBtn5, imageBtn6, imageBtn7, imageBtn8,
+    imageBtn9, imageBtn10;
+    @FXML private ImageView image1, image2, image3, image4, image5, image6, image7, image8, image9, image10;
     @FXML private TextField creationNameField;
     @FXML private Button finishFlickrBtn;
 
+    private CreateVideoTask _videoTask;
     private ImageView[] images;
     private ToggleButton[] imageButtons;
 
@@ -121,8 +101,11 @@ public class mainController implements Initializable, Serializable {
 
     /**************************** END OF REVIEW TAB COMPONENTS **********************************/
 
-
-
+    /**
+     * Initialises all the functionality and logic for the GUI components
+     * @param location
+     * @param resources
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //------------------------- Create the string directory to the working folder -----------
@@ -225,11 +208,15 @@ public class mainController implements Initializable, Serializable {
 
     /*===========================START OF SEARCH PANE LOGIC  ==================================*/
 
-    //------------------------------- searchBtn Button Logic ---------------------------------
-
+    /**
+     * On button click, the _searchTerm is checked then a task is created for the wikit bash commmand and submitted to the executor service
+     * @param event
+     * @throws Throwable
+     */
     @FXML void searchBtnPressed(ActionEvent event) throws Throwable {
         //When the button is clicked, Get the search term
         _searchTerm = searchField.getText();
+        //Check for valid input
         if (_searchTerm.isEmpty() || _searchTerm.trim().isEmpty() || !isAlphanumeric(_searchTerm) || !isAlphanumeric2(_searchTerm)) {
 
             // Show alert if search term is empty
@@ -270,26 +257,36 @@ public class mainController implements Initializable, Serializable {
 
             });
 
+            //Submit to executor service
             ExecutorService searchService = Executors.newFixedThreadPool(1);
             searchService.execute(_searchWikiTask);
             searchService.shutdown();
         }
     }
 
-
+    /**
+     * Cancels the wikit task
+     * @param event
+     */
     @FXML void searchCancelBtnPressed(ActionEvent event) {
         _searchWikiTask.cancel();
     }
 
-    //--------------------------------- addTextBtn Logic --------------------------------------
 
+    /**
+     * Copy the highlighted text to the selectedTextArea
+     * @param event
+     */
     @FXML void addBtnPressed(ActionEvent event) {
         String selectedText = searchTextArea.getSelectedText();
         selectedTextArea.setText(selectedText);
     }
 
-    //--------------------------------- previewSelectedBtn Logic --------------------------------------
-
+    /**
+     * Checks whether the selected text has a valid word count then previews a festival TTS to the user
+     * @param event
+     * @throws Throwable
+     */
     @FXML void previewSelectedBtnPressed(ActionEvent event) throws Throwable {
         // Play the selected text
         String str = selectedTextArea.getText();
@@ -316,28 +313,37 @@ public class mainController implements Initializable, Serializable {
         }
     }
 
-
-    //--------------------------------- clearSelectionBtn Logic -------------------------------
-
+    /**
+     * Clears the selectedTextArea
+     * @param event
+     */
     @FXML void clearSelectionBtnPressed(ActionEvent event) {
         selectedTextArea.clear();
     }
 
-    //--------------------------------- searchNextBtn Logic --------------------------------
-
+    /**
+     * Gets the selected text and updates to the next scene then directs the user to the next scene
+     * @param event
+     * @throws Throwable
+     */
     @FXML void searchNextBtnPressed(ActionEvent event) throws Throwable {
         audioDisplayText.setText(selectedTextArea.getText());
+        //Checks whether the selected text has a valid word count
         if(getWordCounts(selectedTextArea.getText()) < 41 && getWordCounts(selectedTextArea.getText()) > 9) {
             createAudioPane.toFront();
         }
         else{
+            //Otherwise alert the user
             _alert = _alertGenerator.newAlert("Invalid Input", "Invalid word count", "Please have 10 - 40 words only in your selected text area", "error");
             _alert.showAndWait();
         }
     }
 
-    //--------------------------------- searchHelpBtn Logic -----------------------------------------
-
+    /**
+     * Shows a pop up to the user showing the instructions for searching a term in this step
+     * @param event
+     * @throws Throwable
+     */
     @FXML void searchHelpBtnPressed(ActionEvent event) throws Throwable {
         _alert = _alertGenerator.newAlert("", "", "" +
                 "1. Enter a search term in the search box then press 'Enter' or click on the 'Magnifying Glass' button to search\n\n" +
@@ -355,16 +361,20 @@ public class mainController implements Initializable, Serializable {
 
     /*=========================== START OF AUDIO PANE LOGIC ===============================*/
 
-    //--------------------------------- createAudioBtn Logic ----------------------------------
-
+    /**
+     * Checks whether the audio selected is valid then looks at all the audio options and generates an audio file
+     * accordingly then notifies the user when the task is finished. Generated audio files shown in the list on the right.
+     * @param event
+     * @throws Throwable
+     */
     @FXML void createAudioBtnPressed(ActionEvent event) throws Throwable {
         String synthesizer = audioChoiceBox.getValue();
-        //String bgm = backgroundChoiceBox.getValue();
 
+        // Prompt the user for an audio name
         audioFileNamePrompt.showAndWait();
         String audioName = audioFileNamePrompt.getEditor().getText();
 
-        // determine whether it is a valid name
+        // Determine whether it is a valid name
         if (audioName.isEmpty() || audioName.trim().isEmpty() || !isAlphanumeric2(audioName) || !isAlphanumeric(audioName)) {
             _alert = _alertGenerator.newAlert("Invalid name", "Empty input", "Please enter a valid name for this audio file", "error");
             _alert.showAndWait();
@@ -375,10 +385,10 @@ public class mainController implements Initializable, Serializable {
                     // Write the selected text to a .txt file
                     WriteToTxtFile.writeTxt(_path, "Selected.txt", selectedTextArea.getText());
 
-                } catch (Exception writingSelectedTextException) {
-                    writingSelectedTextException.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                // create the audio
+                // Create the audio
                 if (synthesizer == "AKL Accent") {
                     try {
                         AudioCreationTask audioTask = new AudioCreationTask(_path, backgroundChoiceBox.getValue(), audioName, synthesizer);
@@ -408,14 +418,12 @@ public class mainController implements Initializable, Serializable {
                         }
 
                     } catch (Exception e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-
                     refreshAudioList();
 
                 } else {
-                    // use the default synthesizer
+                    // Use the default synthesizer
                     AudioCreationTask audioTask = new AudioCreationTask(_path, backgroundChoiceBox.getValue(), audioName, synthesizer);
 
                     ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -444,15 +452,19 @@ public class mainController implements Initializable, Serializable {
         }
     }
 
-    //--------------------------------- audioBackBtn Logic --------------------------------------
-
-
+    /**
+     * Switches panes by going to the previous screen(search step)
+     * @param event
+     */
     @FXML void audioBackBtnPressed(ActionEvent event) {
         searchTextPane.toFront();
     }
 
-    //--------------------------------- audioHelpBtnPressed Logic --------------------------------------
-
+    /**
+     * Shows a pop up to the user showing instructions of how to create an audio file in this step
+     * @param event
+     * @throws Throwable
+     */
     @FXML void audioHelpBtnPressed(ActionEvent event) throws Throwable {
         _alert = _alertGenerator.newAlert("", "", "" +
                 "1. Your selected will be displayed in the left textbox\n\n" +
@@ -464,13 +476,17 @@ public class mainController implements Initializable, Serializable {
         _alert.show();
     }
 
-    //--------------------------------- combineBtn Logic --------------------------------------
-
+    /**
+     * Gets the selected audio files and combines them through our bash command. Upon successful combining, the user
+     * is notified and the list is updated.
+     * @param event
+     * @throws Throwable
+     */
     @FXML void combineBtnPressed(ActionEvent event) throws Throwable {
         ObservableList<String> selectedItems = audioCreationsList.getSelectionModel().getSelectedItems();
         String audioFileNames = "";
         int count = 0;
-        // must be multiple selection
+        // Must be a multiple selection
         for (String s : selectedItems) {
             audioFileNames = audioFileNames + _path + "/" + s + ".wav ";
             count++;
@@ -489,7 +505,7 @@ public class mainController implements Initializable, Serializable {
             } else {
                 if (isValidName(audioName)) {
 
-                    // combine wav files
+                    // Combine wav files
                     try {
                         genericProcess("sox " + audioFileNames + _path + "/" + audioName + ".wav");
                     } catch (IOException invalidSoxCmdException) {
@@ -518,26 +534,36 @@ public class mainController implements Initializable, Serializable {
         refreshAudioList();
     }
 
-    //--------------------------------- previewAudioBtn Logic ---------------------------------
-
+    /**
+     * Gets the selected audio file and creates a MediaPlayer which can be paused by the user to preview their audio file
+     * @param event
+     */
     @FXML void previewAudioBtnPressed(ActionEvent event) {
         String fileName = audioCreationsList.getSelectionModel().getSelectedItem();
 
         if(fileName == null){
+            // Do nohthing
             return;
         }
         PreviewAudio.previewAudio(_path, fileName);
     }
 
-    //--------------------------------- stopPreviewAudioBtn Logic ---------------------------------
-
+    /**
+     * Stops the previewing audio
+     * @param event
+     */
     @FXML void stopPreviewBtnPressed(ActionEvent event) {
         previewPlayer.stop();
     }
 
-    //--------------------------------- selectAudioBtn Logic ----------------------------------
-
+    /**
+     * When the user clicks on an audio file and presses 'Select', we update path of the audio file for video creation.
+     * The bottom label displaying the selected audio file is also updated. We ony allow one selected audio file.
+     * @param event
+     * @throws Throwable
+     */
     @FXML void selectAudioBtnPressed(ActionEvent event) throws Throwable {
+        //User can only select one audio file to move onto the next section
         if(getSelectedAudioCreationsCount() > 1){
             _alert = _alertGenerator.newAlert("Invalid Selection", "Too many files", "Please select one file only for final creation", "error");
             _alert.showAndWait();
@@ -552,8 +578,10 @@ public class mainController implements Initializable, Serializable {
         }
     }
 
-    //--------------------------------- deleteAudioBtn logic ---------------------------------
-
+    /**
+     * Gets the selected audio file and deletes it
+     * @param event
+     */
     @FXML void deleteAudioBtnPressed(ActionEvent event) {
         ObservableList<String> selectedItems = audioCreationsList.getSelectionModel().getSelectedItems();
 
@@ -572,9 +600,14 @@ public class mainController implements Initializable, Serializable {
     }
 
 
-
-    //--------------------------------- audioNextBtn Logic -----------------------------------------
-
+    /**
+     * Checks whether there is a selected audio file then alerts the user if there isn't. If there is a selected audio file,
+     * we run a flickr task to search flickr for images for their searched term and display a progress bar on the next scene
+     * while the user waits for the searches to appear. The toggle buttons on the flickr scene is then updated on successful
+     * search
+     * @param event
+     * @throws Throwable
+     */
     @FXML void audioNextBtnPressed(ActionEvent event) throws Throwable {
         if(_selectedPressed) {
             flickrProgress.setVisible(true);
@@ -604,18 +637,25 @@ public class mainController implements Initializable, Serializable {
 
     /*=========================== START OF FLICKR PANE LOGIC ===============================*/
 
-    //--------------------------------- finishFlickrBtn Logic -----------------------------------------
-
+    /**
+     * Checks whether the entered creation name already exists and notifies the user if it already is. Also checks whether
+     * the name is alphanumeric/valid. A video creation task is then created and submitted to an executor service. The user is notified
+     * when the video creation is complete and takes them back to the search screen.
+     * @param event
+     * @throws Throwable
+     */
     @FXML void finishFlickrBtnPressed(ActionEvent event) throws Throwable {
         String cmd = "test -e " + _path + "/" + creationNameField.getText() +".mp4";
         ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
         Process process = builder.start();
         process.waitFor();
+        //Gets the exit value to see if the creation anme already exists
         int exitVal = process.exitValue();
         process.destroy();
 
+        // If statements to check validity of the creation name
         if(creationNameField.getText().isEmpty() || !isAlphanumeric(creationNameField.getText()) || !isAlphanumeric2(creationNameField.getText())){
-            _alert = _alertGenerator.newAlert("Invalid Input", "Invalid characaters", "Please enter a name for this creation that is alphanumeric", "error");
+            _alert = _alertGenerator.newAlert("Invalid Input", "Invalid characters", "Please enter a name for this creation that is alphanumeric", "error");
             _alert.showAndWait();
         }
         else if(exitVal == 0){
@@ -623,6 +663,7 @@ public class mainController implements Initializable, Serializable {
             _alert.showAndWait();
         }
         else {
+            // User must select at least one image to create a video
             if(getSelectedImages() == null) {
                 _alert = _alertGenerator.newAlert("No images", "No images selected", "You have not selected any images, please select at least one image", "Error");
                 _alert.showAndWait();
@@ -630,68 +671,42 @@ public class mainController implements Initializable, Serializable {
             }
             else {
                 int num = getSelectedImages().size();
-                System.out.println(num);
                 removeUnselectedImages();
                 _audioFileName = _audioFileName.substring(0, _audioFileName.length() - 1);
-
-                CreateVideoTask videoTask = new CreateVideoTask(creationNameField.getText(), _searchTerm, _audioFileName, _path, num);
+                _videoTask = new CreateVideoTask(creationNameField.getText(), _searchTerm, _audioFileName, _path, num);
+                //Submit task to executor service
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
-                executorService.submit(videoTask);
-                videoTask.setOnRunning((whileRunning) -> {
-                    flickrProgress.setVisible(true);
-                    flickrProgress.progressProperty().bind(videoTask.progressProperty());
-                    flickrSceneLabel.setText("Generating video please wait...");
+                executorService.submit(_videoTask);
+
+                _videoTask.setOnRunning((whileRunning) -> {
+                    setUpVideoCreationOnRunning();
                 });
 
-                videoTask.setOnCancelled((onCancel) -> {
-                    try {
-                        genericProcess("rm -r " + _path + "/temp/");
-                    } catch (InterruptedException | IOException e) {
-                        e.printStackTrace();
-                    }
-                    flickrProgress.setVisible(false);
-                    flickrProgress.progressProperty().unbind();
-                    flickrSceneLabel.setText("Video creation interrupted, please try again");
-                });
-
-                videoTask.setOnSucceeded((whenFinished) -> {
+                _videoTask.setOnSucceeded((whenFinished) -> {
                     executorService.shutdown();
-                    flickrProgress.setVisible(false);
-                    flickrProgress.progressProperty().unbind();
-                    flickrSceneLabel.setText("Video creation is complete");
-
-                    Creation creation = new Creation(creationNameField.getText(), _searchTerm);
-                    _existingCreations.add(creation);
-                    tableViewForReview.getItems().clear();
-                    tableViewForReview.getItems().addAll(_existingCreations);
-                    try {
-                        saveCreations(_existingCreations);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        _alert = _alertGenerator.newAlert("Creation success", "Video generation successful", "Click 'Ok' to return to the beginning", "information");
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                    _alert.showAndWait();
-                    searchTextPane.toFront();
-                    try {
-                        clearAll();
-                    } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    setUpVideoCreationOnSuccess();
                 });
             }
         }
 
     }
 
+    /**
+     * Goes back to the audio creation scene then removes already searched images
+     * @param event
+     * @throws IOException
+     * @throws InterruptedException
+     */
     @FXML void flickrBackBtnPressed(ActionEvent event) throws IOException, InterruptedException {
         createAudioPane.toFront();
         genericProcess("rm -r " + _path + "/temp/");
     }
 
+    /**
+     * Shows the user a pop up listing all the steps to create a video in this step
+     * @param event
+     * @throws Throwable
+     */
     @FXML void flickrHelpBtnPressed(ActionEvent event) throws Throwable {
         _alert = _alertGenerator.newAlert("", "", "" +
                 "1. Click on the images that you want\n\n" +
@@ -707,23 +722,28 @@ public class mainController implements Initializable, Serializable {
 
     /**************************** END OF CREATION TAB LOGIC ***********************************/
 
-    //=========================================================================================
-
-
 
     /************************** START OF REVIEW TAB LOGIC *************************************/
+
+    /**
+     * Gets the selected creation and updates the MediaView with a media player then begins to
+     * play the creaiton for the user
+     * @param event
+     */
     @FXML void reviewStartPlayBtnPressed(ActionEvent event) {
         Creation selection = tableViewForReview.getSelectionModel().getSelectedItem();
         if(selection == null){
             //do nothing
             return;
         }
+        //If there already is something playing, stop it
         if(reviewMediaPlayer != null){
             reviewMediaPlayer.stop();
         }
         _currentlyPlaying = selection;
         String videoName = selection.getName();
 
+        //Set up the media player
         String path = _path + "/" + videoName + ".mp4";
         Media media = new Media(new File(path).toURI().toString());
         reviewMediaPlayer = new MediaPlayer(media);
@@ -741,27 +761,43 @@ public class mainController implements Initializable, Serializable {
         });
     }
 
+    /**
+     * Plays/resumes the video
+     * @param event
+     */
     @FXML void reviewPlayBtnPressed(ActionEvent event) {
         reviewMediaPlayer.play();
     }
 
+    /**
+     * Pauses the video
+     * @param event
+     */
     @FXML void reviewPauseBtnPressed(ActionEvent event) {
         reviewMediaPlayer.pause();
     }
 
+    /**
+     * Stops the video
+     * @param event
+     */
     @FXML void reviewStopBtnPressed(ActionEvent event) {
         reviewMediaPlayer.stop();
     }
 
+    /**
+     * Confirms whether the user wants to delete the video file and removes their selection upon confirmation
+     * @param event
+     */
     @FXML void reviewDeleteBtnPressed(ActionEvent event) {
         Creation selection = tableViewForReview.getSelectionModel().getSelectedItem();
         String videoName = selection.getName();
         try {
             if(selection == null){
-                System.out.println("hello");
                 //do nothing
                 return;
             }
+            // Get confirmation from user for creation deletion
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + videoName + " ?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
             alert.showAndWait();
 
@@ -778,6 +814,10 @@ public class mainController implements Initializable, Serializable {
         }
     }
 
+    /**
+     * Shows the user a pop up listing the instructions and details of the review scene
+     * @throws Throwable
+     */
     @FXML public void reviewHelpBtnPressed() throws Throwable {
         _alert = _alertGenerator.newAlert("Active Learning Component", "", "" +
                 "1. Choose a creation that you want to play by clicking on the list\n\n" +
@@ -790,6 +830,9 @@ public class mainController implements Initializable, Serializable {
         _alert.show();
     }
 
+    /**
+     * Controls the logic of editing the table view cell: ConfidenceLevel.
+     */
     public void editableConfidence() {
         _confidenceLevel.setCellFactory(TextFieldTableCell.forTableColumn());
         _confidenceLevel.setOnEditCommit(e -> {
@@ -837,11 +880,14 @@ public class mainController implements Initializable, Serializable {
 
     /**************************** END OF REVIEW TAB LOGIC *************************************/
 
-    //=========================================================================================
 
     //--------------------------------- helper functions ---------------------------------------
 
-
+    /**
+     * Clears all text fields and removes all temporary files needed for creations
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void clearAll() throws IOException, InterruptedException {
         searchField.clear();
         searchTextArea.clear();
@@ -856,7 +902,11 @@ public class mainController implements Initializable, Serializable {
         refreshAudioList();
     }
 
-    // Counts the number of words in a string
+    /**
+     * Counts the number of words in a string
+     * @param str
+     * @return
+     */
     public int getWordCounts(String str) {
         int count=0;
         char ch[]= new char[str.length()];
@@ -873,13 +923,20 @@ public class mainController implements Initializable, Serializable {
 
     }
 
+
+    /**
+     * Updates the audio list in the audio creation scene
+     */
     public void refreshAudioList() {
         List<String> fileNames = getAudioNameList();
         ObservableList<String> items = FXCollections.observableList(fileNames);
         audioCreationsList.setItems(items);
     }
 
-    // Gets a list of names from existing files
+    /**
+     * Gets a list of existing audio files created by the user in the audio creation scene
+     * @return
+     */
     public List<String> getAudioNameList() {
         try {
             String cmd = "ls " + _path + "/" + " | grep wav | sort | cut -f1 -d'.'";
@@ -901,7 +958,11 @@ public class mainController implements Initializable, Serializable {
     }
 
 
-    // Checks whether the name is valid
+    /**
+     * Checks whether a file is valid/already exists
+     * @param InputName
+     * @return
+     */
     public boolean isValidName(String InputName) {
         boolean IsExist = false;
         List<String> fileNames = getAudioNameList();
@@ -919,7 +980,12 @@ public class mainController implements Initializable, Serializable {
 
     }
 
-    // Checks if file already exists
+    /**
+     * Checks whether a file already exists
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public boolean isCreated() throws IOException, InterruptedException {
         String cmd = "cat " + _path + "/" + "error.txt";
         ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
@@ -940,7 +1006,10 @@ public class mainController implements Initializable, Serializable {
         }
     }
 
-    //Generates voice files
+    /**
+     * Generates the voice files used for audio creation in the audio creation scene
+     * @throws IOException
+     */
     public void generateScm() throws IOException {
         FileWriter fw1 = new FileWriter(_path + "/" + "akl.scm");
         fw1.write("(voice_akl_nz_jdt_diphone)");
@@ -952,6 +1021,10 @@ public class mainController implements Initializable, Serializable {
 
     }
 
+    /**
+     * Gets the number of selected audio files by the user in the audio creation scene
+     * @return
+     */
     public int getSelectedAudioCreationsCount() {
         ObservableList<String> selectedItems = audioCreationsList.getSelectionModel().getSelectedItems();
         _audioFileName = "";
@@ -961,10 +1034,13 @@ public class mainController implements Initializable, Serializable {
             _audioFileName = _audioFileName + _path + "/" + s + ".wav ";
             count++;
         }
-        System.out.println("aud file= " + _audioFileName);
         return count;
     }
 
+
+    /**
+     * Updates the images for the toggle buttons  in the flickr/video creation scene when the flickr search is complete
+     */
     public void updateImages() {
         File imagesDir = new File(_path + "/temp");
         File[] imagesList = imagesDir.listFiles();
@@ -974,6 +1050,10 @@ public class mainController implements Initializable, Serializable {
         }
     }
 
+    /**
+     * Gets the list of selected images by the user in the flickr/video creation scene
+     * @return
+     */
     public List<Image> getSelectedImages() {
         int count = 0;
         //Initial check if no images are selected
@@ -995,6 +1075,11 @@ public class mainController implements Initializable, Serializable {
         return selectedImages;
     }
 
+    /**
+     * Gets the list of unselected images so they can be deleted in preparation for video creation in the flickr/video
+     * creation scene
+     * @return
+     */
     public List<Image> getUnselectedImages() {
         int count = 0;
         //Initial check if no images are selected
@@ -1016,6 +1101,10 @@ public class mainController implements Initializable, Serializable {
         return unselectedImages;
     }
 
+    /**
+     * Removes all the unselected images in preparation for video creation in the flickr/video creation scene
+     * @throws IOException
+     */
     public void removeUnselectedImages() throws IOException {
         List<Image> unselectedImages = getUnselectedImages();
         for(int i = 0; i < unselectedImages.size(); i++){
@@ -1026,6 +1115,11 @@ public class mainController implements Initializable, Serializable {
         }
     }
 
+    /**
+     * Saves the existing creation objects to a text file so data is saved when application is closed
+     * @param creations
+     * @throws IOException
+     */
     public void saveCreations(List<Creation> creations) throws IOException {
         File file = new File(_path + "/creations.txt");
         file.delete();
@@ -1042,6 +1136,10 @@ public class mainController implements Initializable, Serializable {
         objOutput.close();
     }
 
+    /**
+     * Used for reading existing creation objects created before previous shutdowns so state is saved for existing creations
+     * @throws IOException
+     */
     public void updateCreations() throws IOException {
         File file = new File(_path + "/creations.txt");
 
@@ -1073,6 +1171,11 @@ public class mainController implements Initializable, Serializable {
 
     }
 
+    /**
+     * Checks whether input string is alphanumeric - handles unicode
+     * @param str
+     * @return
+     */
     public boolean isAlphanumeric2(String str) {
         for (int i=0; i<str.length(); i++) {
             char c = str.charAt(i);
@@ -1082,6 +1185,11 @@ public class mainController implements Initializable, Serializable {
         return true;
     }
 
+    /**
+     * Checks whether input string is alphanumeric
+     * @param str
+     * @return
+     */
     public boolean isAlphanumeric(String str) {
         for (int i=0; i<str.length(); i++) {
             char c = str.charAt(i);
@@ -1092,6 +1200,13 @@ public class mainController implements Initializable, Serializable {
         return true;
     }
 
+    /**
+     * Runs a process given a bash command, waits for the process to finish then destroys it. This is only used for commands
+     * that do not need to reference the process outputs and used only for processes that are very quick.
+     * @param cmd
+     * @throws InterruptedException
+     * @throws IOException
+     */
     public void genericProcess(String cmd) throws InterruptedException, IOException {
         ProcessBuilder genericPb = new ProcessBuilder("bash", "-c" , cmd);
         Process genericProcess = genericPb.start();
@@ -1099,6 +1214,9 @@ public class mainController implements Initializable, Serializable {
         genericProcess.destroy();;
     }
 
+    /**
+     * Updates the GUI in the search scene while the search is running
+     */
     public void setUpSearchWikiOnRunning(){
         searchCancelBtn.setVisible(true);
         searchProgress.setVisible(true);
@@ -1108,6 +1226,9 @@ public class mainController implements Initializable, Serializable {
         searchingLabel.setVisible(true);
     }
 
+    /**
+     * Updates the GUi in the search scene when the search is cancelled
+     */
     public void setUpSearchWikiOnCancelled(){
         searchField.clear();
         _searchTerm = "";
@@ -1119,6 +1240,9 @@ public class mainController implements Initializable, Serializable {
         searchProgress.setProgress(0);
     }
 
+    /**
+     * Updates the GUI in the search scene when the search is completed
+     */
     public void setUpSearchWikiOnSuccess(){
         searchCancelBtn.setVisible(false);
         searchProgress.setVisible(false);
@@ -1128,6 +1252,13 @@ public class mainController implements Initializable, Serializable {
         searchProgress.setProgress(0);
     }
 
+    /**
+     * Runs a process in the search scene to check whether the output from the wikit command returns no results for the
+     * users search term
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public String getSearchResultProcess() throws IOException, InterruptedException {
         String cmd = "cat " + _path + "/" + "textFromWiki.txt";
         ProcessBuilder searchWikiPb = new ProcessBuilder("bash", "-c", cmd);
@@ -1141,6 +1272,9 @@ public class mainController implements Initializable, Serializable {
         return searchWikiLine;
     }
 
+    /**
+     * Runs a process in the search scene that updates the GUI with the users search results
+     */
     public void setUpSearchResult(){
         try {
             String getTextCmd = "cat " + _path + "/" + "textFromWiki.txt";
@@ -1162,6 +1296,9 @@ public class mainController implements Initializable, Serializable {
         _searchText = "";
     }
 
+    /**
+     * Updates the GUI in the flickr/video creation scene while the flickr search is running
+     */
     public void setUpFlickrOnRunning(){
         for(int i = 0; i < images.length; i++){
             images[i].setVisible(false);
@@ -1171,6 +1308,9 @@ public class mainController implements Initializable, Serializable {
 
     }
 
+    /**
+     * Updates the GUI in the flickr/video creation scene when the flickr search is completed
+     */
     public void setUpFlickrOnSuccess(){
         _flickrService.shutdown();
         for(int i = 0; i < images.length; i++){
@@ -1182,6 +1322,50 @@ public class mainController implements Initializable, Serializable {
         finishFlickrBtn.setDisable(false);
         searchingLabel.setText("");
         updateImages();
+    }
+
+    /**
+     * Updates the GUI in the flickr/video creation scene while the video creation task is running
+     */
+    public void setUpVideoCreationOnRunning(){
+        flickrProgress.setVisible(true);
+        flickrProgress.progressProperty().bind(_videoTask.progressProperty());
+        flickrSceneLabel.setText("Generating video please wait...");
+    }
+
+    /**
+     * Updates the GUI in the flickr/video creation scene when the video creation task is successful
+     */
+    public void setUpVideoCreationOnSuccess(){
+        flickrProgress.setVisible(false);
+        flickrProgress.progressProperty().unbind();
+        flickrSceneLabel.setText("Video creation is complete");
+
+        // Create a new creation obj for the video and update the tableview
+        Creation creation = new Creation(creationNameField.getText(), _searchTerm);
+        _existingCreations.add(creation);
+        tableViewForReview.getItems().clear();
+        tableViewForReview.getItems().addAll(_existingCreations);
+
+        // Saves the creations to a text file to save state when application closes
+        try {
+            saveCreations(_existingCreations);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // Upon completion, notify the user and take them back to the search scene
+        try {
+            _alert = _alertGenerator.newAlert("Creation success", "Video generation successful", "Click 'Ok' to return to the beginning", "information");
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+        _alert.showAndWait();
+        searchTextPane.toFront();
+        try {
+            clearAll();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 

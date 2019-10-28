@@ -8,6 +8,11 @@ import java.io.File;
 
 public class PreviewAudio {
 
+    /**
+     * Creates a media player and plays the preview
+     * @param path
+     * @param fileName
+     */
     public static void previewAudio(String path, String fileName){
         fileName = fileName.replace("\n", "").replace("\r", "");
         File audioUrl = new File (path + "/" + fileName + ".wav");

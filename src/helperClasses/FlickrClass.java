@@ -10,19 +10,28 @@ import com.flickr4java.flickr.*;
 import com.flickr4java.flickr.photos.*;
 import javafx.concurrent.Task;
 
+
 public class FlickrClass extends Task<Void> {
     private static int _num;
     private static String _searchTerm, _path;
 
-
+    /**
+     * Creates a flickr task with the given search term
+     * @param searchTerm
+     * @param path
+     */
     public FlickrClass(String searchTerm, String path){
         _searchTerm = searchTerm;
         _num = 10;
         _path = path;
     }
 
-    private String _storage;
-
+    /**
+     * Gets the flickr api key, should be located in the same level as the jar/project
+     * @param key
+     * @return
+     * @throws Exception
+     */
     public String getAPIKey(String key) throws Exception {
         File file = new File("./flickr-api-keys.txt");
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -38,15 +47,19 @@ public class FlickrClass extends Task<Void> {
         throw new RuntimeException("Couldn't find " + key +" in config file "+file.getName());
     }
 
+    /**
+     * Runs the flickr search and downloads images relating to the search term. The number of images downloaded is fixed to 10
+     * @return
+     */
     public Void call() {
         try {
+            //NASSIR WROTE THIS CODE HE CAN EXPLAIN THIS
             String apiKey = getAPIKey("apiKey");
             String sharedSecret = getAPIKey("sharedSecret");
 
             Flickr flickr = new Flickr(apiKey, sharedSecret, new REST());
 
             String query = _searchTerm;
-//            int resultsPerPage = 5;
             int page = 0;
 
             PhotosInterface photos = flickr.getPhotosInterface();
@@ -63,6 +76,8 @@ public class FlickrClass extends Task<Void> {
                     String cmd = "mkdir " + _path + "/temp";
                     ProcessBuilder builder = new ProcessBuilder("bash", "-c", cmd);
                     Process process = builder.start();
+                    process.waitFor();
+                    process.destroy();
 
                     BufferedImage image = photos.getImage(photo,Size.LARGE);
                     String filename = query.trim().replace(' ', '-')+"-"+System.currentTimeMillis()+"-"+photo.getId()+".jpg";

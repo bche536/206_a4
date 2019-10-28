@@ -16,10 +16,19 @@ import javafx.concurrent.Task;
 public class WikiSearch extends Task<Void> {
 	private String _toSearch;
 
+	/**
+	 * Creates the wikit search task with the given search term
+	 * @param ToSearch
+	 */
 	public WikiSearch(String ToSearch) {
 		_toSearch = ToSearch;
 	}
 
+	/**
+	 *	Runs the wikit bash command and searches for the search term and writes the output to a text file
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
 	protected Void call() throws Exception {
 		// TODO Auto-generated method stub
@@ -50,6 +59,9 @@ public class WikiSearch extends Task<Void> {
 				bw1.write(str);
 			}
 			bw1.close();
+
+			process.waitFor();
+			process.destroy();
 
 		} catch (IOException e) {
 

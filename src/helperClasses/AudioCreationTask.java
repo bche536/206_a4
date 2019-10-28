@@ -10,6 +10,13 @@ import java.io.File;
 public class AudioCreationTask extends Task<Void> {
     private String _path, _bgmChoice, _audioName, _synth;
 
+    /**
+     * Creates a audio creation task with the given audio optios
+     * @param path
+     * @param bgmChoice
+     * @param audio
+     * @param synth
+     */
     public AudioCreationTask(String path, String bgmChoice, String audio, String synth){
         _path = path;
         _bgmChoice = bgmChoice;
@@ -17,7 +24,11 @@ public class AudioCreationTask extends Task<Void> {
         _synth = synth;
     }
 
-
+    /**
+     * Checks the audio options given in the command and creates an audio file accordingly
+     * @return
+     * @throws Exception
+     */
     @Override
     protected Void call() throws Exception {
         if(_bgmChoice.contentEquals("no background music")) {
@@ -69,6 +80,7 @@ public class AudioCreationTask extends Task<Void> {
             convProcess.waitFor();
 
             File file = new File(_path + "/tempaud.wav");
+            // Calculates the length of the wikit audio file to use as the arguments for the combination bash command
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
             AudioFormat format = audioInputStream.getFormat();
             long frames = audioInputStream.getFrameLength();

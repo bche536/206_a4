@@ -11,6 +11,14 @@ public class CreateVideoTask extends Task<Void> {
     private String _searchTerm, _creationName, _pathToAudio, _dirPath;
     private int _num;
 
+    /**
+     * Creates a task with the arguments provided
+     * @param creationName
+     * @param searchTerm
+     * @param pathToAudio
+     * @param dirPath
+     * @param num
+     */
     public CreateVideoTask(String creationName, String searchTerm, String pathToAudio, String dirPath, int num){
         _creationName = creationName;
         _searchTerm = searchTerm;
@@ -19,6 +27,11 @@ public class CreateVideoTask extends Task<Void> {
         _num = num;
     }
 
+    /**
+     * Creates a video given the input arguments
+     * @return
+     * @throws Exception
+     */
     @Override
     protected Void call() throws Exception {
         try {

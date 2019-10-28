@@ -12,6 +12,11 @@ import java.io.IOException;
 public class Main extends Application {
     private String _path;
 
+    /**
+     * Loads the stage and starts at the intro.fxml file
+     * @param primaryStage
+     * @throws Exception
+     */
     @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/intro.fxml"));
@@ -20,11 +25,16 @@ public class Main extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
 
+        // Set up the path for stop() method to delete temp files
         String myDirectory = "206project_team17"; // user Folder Name
         String users_home = System.getProperty("user.home");
         _path = users_home.replace("\\", "/") + File.separator + myDirectory;
     }
 
+    /**
+     * On application exit, remove any temporary files created
+     * @throws IOException
+     */
     @Override
     public void stop() throws IOException {
         String cmd = "rm -r " + _path + "/temp/ " + _path + "/*.wav";

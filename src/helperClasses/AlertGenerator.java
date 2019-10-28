@@ -8,6 +8,15 @@ public class AlertGenerator {
     private Alert alert;
     private Object InvalidArgumentException;
 
+    /**
+     * Generates an alert when given inputs for the title, header, content and alert type
+     * @param title
+     * @param header
+     * @param content
+     * @param type
+     * @return
+     * @throws Throwable
+     */
     public Alert newAlert(String title, String header, String content, String type) throws Throwable {
         if (type.toLowerCase().equals("error")) {
             alert = new Alert(Alert.AlertType.ERROR);
